@@ -7,6 +7,7 @@
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="ScopedValue.h" />
     <ClInclude Include="FFmpegHelpers.h" />
+    <ClInclude Include="DxHelpres\DxDevice.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -14,5 +15,6 @@
     <ClCompile Include="FileDialogEventsImpl.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FFmpegHelpers.cpp" />
+    <ClCompile Include="DxHelpres\DxDevice.cpp" />
   </ItemGroup>
 </Project>

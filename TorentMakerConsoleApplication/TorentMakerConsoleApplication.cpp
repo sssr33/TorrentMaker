@@ -6,6 +6,7 @@
 #include "FFmpegIoCtx.h"
 #include "ScopedValue.h"
 #include "FFmpegHelpers.h"
+#include "DxHelpres\DxDevice.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -259,7 +260,7 @@ int main() {
 					}
 				}
 
-				int stop = 432;
+				DxDevice dxDev;
 			}
 
 			if (seekFlags & AVSEEK_FLAG_BYTE) {
