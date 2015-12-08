@@ -531,7 +531,7 @@ int main() {
 
 				ImageUtils imgUtils;
 
-				auto savePath = H::System::GetPackagePath() + L"screen.png";
+				auto savePath = H::System::GetPackagePath() + L"screen0.png";
 				auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
 				auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
 
