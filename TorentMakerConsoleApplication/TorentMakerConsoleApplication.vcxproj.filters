@@ -17,4 +17,8 @@
     <ClCompile Include="FFmpegHelpers.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />
+    <FxCompile Include="Shaders\QuadStripFromFltIndexVs.hlsl" />
+  </ItemGroup>
 </Project>

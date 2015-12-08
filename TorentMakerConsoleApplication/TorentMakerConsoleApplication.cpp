@@ -14,6 +14,7 @@
 #include <ShObjIdl.h>
 #include <libhelpers\H.h>
 #include <libhelpers\CoUniquePtr.h>
+#include <libhelpers\ImageUtils.h>
 
 extern "C" {
 #include <libavformat\avformat.h>
@@ -261,6 +262,286 @@ int main() {
 				}
 
 				DxDevice dxDev;
+				auto d3dDev = dxDev.GetD3DDevice();
+				auto d3dCtx = dxDev.GetD3DContext();
+
+				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvY, srvU, srvV;
+				Microsoft::WRL::ComPtr<ID3D11Texture2D> texBGRA;
+				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBGRA;
+				Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvBGRA;
+				Microsoft::WRL::ComPtr<ID3D11Texture2D> screenTex;
+
+				Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxBuf;
+
+				Microsoft::WRL::ComPtr<ID3D11InputLayout> fltIdxInputLayout;
+				Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxCBuffer;
+				Microsoft::WRL::ComPtr<ID3D11VertexShader> fltIdxVs;
+
+				Microsoft::WRL::ComPtr<ID3D11PixelShader> yuv420pToRgbaPs;
+
+				Microsoft::WRL::ComPtr<ID3D11SamplerState> pointSampler;
+				Microsoft::WRL::ComPtr<ID3D11SamplerState> linearSampler;
+
+				// yuv420p tex resources
+				{
+					D3D11_SUBRESOURCE_DATA subResData;
+					D3D11_TEXTURE2D_DESC yuv420pTexDesc;
+					D3D11_SHADER_RESOURCE_VIEW_DESC yuv420pSrvDesc;
+
+					// Y
+					yuv420pTexDesc.Width = decCtx->width;
+					yuv420pTexDesc.Height = decCtx->height;
+					yuv420pTexDesc.MipLevels = 1;
+					yuv420pTexDesc.ArraySize = 1;
+					yuv420pTexDesc.Format = DXGI_FORMAT_R8_UNORM;
+					yuv420pTexDesc.SampleDesc.Count = 1;
+					yuv420pTexDesc.SampleDesc.Quality = 0;
+					yuv420pTexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+					yuv420pTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+					yuv420pTexDesc.CPUAccessFlags = 0;
+					yuv420pTexDesc.MiscFlags = 0;
+
+					subResData.pSysMem = frame->data[0];
+					subResData.SysMemPitch = frame->linesize[0];
+					subResData.SysMemSlicePitch = 0;
+
+					yuv420pSrvDesc.Format = yuv420pTexDesc.Format;
+					yuv420pSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+					yuv420pSrvDesc.Texture2D.MipLevels = yuv420pTexDesc.MipLevels;
+					yuv420pSrvDesc.Texture2D.MostDetailedMip = 0;
+
+					{
+						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
+						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+
+						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvY.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+					}
+
+					//U
+					yuv420pTexDesc.Width = decCtx->width / 2;
+					yuv420pTexDesc.Height = decCtx->height / 2;
+
+					subResData.pSysMem = frame->data[1];
+					subResData.SysMemPitch = frame->linesize[1];
+
+					{
+						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
+						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+
+						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvU.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+					}
+
+					//V
+					subResData.pSysMem = frame->data[2];
+					subResData.SysMemPitch = frame->linesize[2];
+
+					{
+						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
+						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+
+						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvV.GetAddressOf());
+						H::System::ThrowIfFailed(hr);
+					}
+				}
+
+				// bgra tex resources
+				{
+					D3D11_TEXTURE2D_DESC texDesc;
+					D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+					D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+
+					texDesc.Width = decCtx->width;
+					texDesc.Height = decCtx->height;
+					texDesc.MipLevels = 0;
+					texDesc.ArraySize = 1;
+					texDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+					texDesc.SampleDesc.Count = 1;
+					texDesc.SampleDesc.Quality = 0;
+					texDesc.Usage = D3D11_USAGE_DEFAULT;
+					texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+					texDesc.CPUAccessFlags = 0;
+					texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+					srvDesc.Format = texDesc.Format;
+					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+					srvDesc.Texture2D.MipLevels = -1;
+					srvDesc.Texture2D.MostDetailedMip = 0;
+
+					rtvDesc.Format = texDesc.Format;
+					rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+					rtvDesc.Texture2D.MipSlice = 0;
+
+					hr = d3dDev->CreateTexture2D(&texDesc, nullptr, texBGRA.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+
+					hr = d3dDev->CreateShaderResourceView(texBGRA.Get(), &srvDesc, srvBGRA.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+
+					hr = d3dDev->CreateRenderTargetView(texBGRA.Get(), &rtvDesc, rtvBGRA.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				// screen tex
+				{
+					D3D11_TEXTURE2D_DESC texDesc;
+
+					texDesc.Width = decCtx->width;
+					texDesc.Height = decCtx->height;
+					texDesc.MipLevels = 1;
+					texDesc.ArraySize = 1;
+					texDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+					texDesc.SampleDesc.Count = 1;
+					texDesc.SampleDesc.Quality = 0;
+					texDesc.Usage = D3D11_USAGE_STAGING;
+					texDesc.BindFlags = 0;
+					texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+					texDesc.MiscFlags = 0;
+
+					hr = d3dDev->CreateTexture2D(&texDesc, nullptr, screenTex.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				//flt idx buffer
+				{
+					float idx[] = { 0, 1, 2, 3 };
+					D3D11_BUFFER_DESC bufDesc;
+					D3D11_SUBRESOURCE_DATA subResData;
+
+					bufDesc.ByteWidth = sizeof(idx);
+					bufDesc.Usage = D3D11_USAGE_IMMUTABLE;
+					bufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+					bufDesc.CPUAccessFlags = 0;
+					bufDesc.MiscFlags = 0;
+					bufDesc.StructureByteStride = 0;
+
+					subResData.pSysMem = idx;
+					subResData.SysMemPitch = 0;
+					subResData.SysMemSlicePitch = 0;
+
+					hr = d3dDev->CreateBuffer(&bufDesc, &subResData, fltIdxBuf.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+
+					bufDesc.ByteWidth = sizeof(DirectX::XMMATRIX);
+					bufDesc.Usage = D3D11_USAGE_DEFAULT;
+					bufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+					hr = d3dDev->CreateBuffer(&bufDesc, &subResData, fltIdxCBuffer.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				// fltIdxVs
+				{
+					auto data = H::System::LoadPackageFile(L"QuadStripFromFltIndexVs.cso");
+
+					hr = d3dDev->CreateVertexShader(data.data(), data.size(), nullptr, fltIdxVs.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+
+					D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+						{ "POSITION", 0, DXGI_FORMAT_R32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+					};
+
+					hr = d3dDev->CreateInputLayout(inputDesc, ARRAY_SIZE(inputDesc), data.data(), data.size(), fltIdxInputLayout.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				// yuv420pToRgbaPs
+				{
+					auto data = H::System::LoadPackageFile(L"Yuv420pToRgbaPS.cso");
+
+					hr = d3dDev->CreatePixelShader(data.data(), data.size(), nullptr, yuv420pToRgbaPs.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				// samplers
+				{
+					D3D11_SAMPLER_DESC samplerDesc;
+
+					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+					samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.MinLOD = -FLT_MAX;
+					samplerDesc.MaxLOD = FLT_MAX;
+					samplerDesc.MipLODBias = 0.0f;
+					samplerDesc.MaxAnisotropy = 1;
+					samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+					std::memset(samplerDesc.BorderColor, 0, sizeof(samplerDesc.BorderColor));
+
+					hr = d3dDev->CreateSamplerState(&samplerDesc, pointSampler.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+
+					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+					hr = d3dDev->CreateSamplerState(&samplerDesc, linearSampler.GetAddressOf());
+					H::System::ThrowIfFailed(hr);
+				}
+
+				DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
+
+				transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixScaling(2, 2, 1));
+				transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixTranslation(0, 0, 1));
+				transform = DirectX::XMMatrixTranspose(transform);
+
+				d3dCtx->UpdateSubresource(fltIdxCBuffer.Get(), 0, nullptr, &transform, 0, 0);
+
+				d3dCtx->ClearRenderTargetView(rtvBGRA.Get(), DirectX::Colors::White);
+				d3dCtx->OMSetRenderTargets(1, rtvBGRA.GetAddressOf(), nullptr);
+
+				D3D11_VIEWPORT viewport;
+
+				viewport.Width = (float)decCtx->width;
+				viewport.Height = (float)decCtx->height;
+				viewport.TopLeftX = viewport.TopLeftY = 0.0f;
+				viewport.MinDepth = 0.0f;
+				viewport.MaxDepth = 1.0f;
+
+				d3dCtx->RSSetViewports(1, &viewport);
+
+				d3dCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+				{
+					uint32_t stride = 4;
+					uint32_t offset = 0;
+					d3dCtx->IASetVertexBuffers(0, 1, fltIdxBuf.GetAddressOf(), &stride, &offset);
+				}
+
+				d3dCtx->IASetInputLayout(fltIdxInputLayout.Get());
+
+				d3dCtx->VSSetConstantBuffers(0, 1, fltIdxCBuffer.GetAddressOf());
+				d3dCtx->VSSetShader(fltIdxVs.Get(), nullptr, 0);
+
+				d3dCtx->PSSetShader(yuv420pToRgbaPs.Get(), nullptr, 0);
+				d3dCtx->PSSetSamplers(0, 1, pointSampler.GetAddressOf());
+				d3dCtx->PSSetShaderResources(0, 1, srvY.GetAddressOf());
+				d3dCtx->PSSetShaderResources(1, 1, srvU.GetAddressOf());
+				d3dCtx->PSSetShaderResources(2, 1, srvV.GetAddressOf());
+
+				d3dCtx->Draw(4, 0);
+
+				d3dCtx->CopySubresourceRegion(screenTex.Get(), 0, 0, 0, 0, texBGRA.Get(), 0, nullptr);
+
+				D3D11_MAPPED_SUBRESOURCE mappedSubRes;
+				hr = d3dCtx->Map(screenTex.Get(), 0, D3D11_MAP_READ, 0, &mappedSubRes);
+				H::System::ThrowIfFailed(hr);
+
+				ImageUtils imgUtils;
+
+				auto savePath = H::System::GetPackagePath() + L"screen.png";
+				auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
+				auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
+
+				imgUtils.EncodeAllocPixels(encodeFrame.Get(), DirectX::XMUINT2(decCtx->width, decCtx->height), GUID_WICPixelFormat32bppBGRA);
+				imgUtils.EncodePixels(encodeFrame.Get(), decCtx->height, mappedSubRes.RowPitch, mappedSubRes.RowPitch * decCtx->height * 4, mappedSubRes.pData);
+
+				imgUtils.EncodeCommit(encodeFrame.Get());
+				imgUtils.EncodeCommit(encoder.Get());
+
+				d3dCtx->Unmap(screenTex.Get(), 0);
 			}
 
 			if (seekFlags & AVSEEK_FLAG_BYTE) {

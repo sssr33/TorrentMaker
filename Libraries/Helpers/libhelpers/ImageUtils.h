@@ -200,7 +200,7 @@ public:
 		HRESULT hr = S_OK;
 		Microsoft::WRL::ComPtr<IStream> istream;
 		Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
-
+		
 		hr = this->wicFactory->CreateDecoderFromFilename(
 			path.c_str(),
 			nullptr,
@@ -272,7 +272,7 @@ public:
 		Microsoft::WRL::ComPtr<IStream> istream;
 		Microsoft::WRL::ComPtr<IWICBitmapEncoder> encoder;
 
-		hr = SHCreateStreamOnFileW(path.c_str(), STGM_READWRITE, istream.GetAddressOf());
+		hr = SHCreateStreamOnFileEx(path.c_str(), STGM_READWRITE | STGM_CREATE, 0, FALSE, nullptr, istream.GetAddressOf());
 		H::System::ThrowIfFailed(hr);
 
 		hr = this->wicFactory->CreateEncoder(containerFormat, nullptr, encoder.GetAddressOf());
