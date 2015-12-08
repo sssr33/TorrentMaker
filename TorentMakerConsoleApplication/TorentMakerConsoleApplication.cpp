@@ -7,6 +7,7 @@
 #include "ScopedValue.h"
 #include "FFmpegHelpers.h"
 #include "DxHelpres\DxDevice.h"
+#include "Texture\Yuv420pTexture.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -50,6 +51,19 @@ GetAddressOfUnique<T, D> GetAddressOf(std::unique_ptr<T, D> &v) {
 template<class T, class D>
 std::unique_ptr<T, D> WrapUnique(T *ptr, const D &deleter) {
 	return std::unique_ptr<T, D>(ptr, deleter);
+}
+
+template<uint32_t size>
+std::array<D3D11_SUBRESOURCE_DATA, size> GetData(const AVFrame *frame) {
+	std::array<D3D11_SUBRESOURCE_DATA, size> data;
+
+	for (uint32_t i = 0; i < size; i++) {
+		data[i].pSysMem = frame->data[i];
+		data[i].SysMemPitch = frame->linesize[i];
+		data[i].SysMemSlicePitch = 0;
+	}
+
+	return data;
 }
 
 void EnumFiles(
@@ -265,7 +279,11 @@ int main() {
 				auto d3dDev = dxDev.GetD3DDevice();
 				auto d3dCtx = dxDev.GetD3DContext();
 
-				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvY, srvU, srvV;
+				Yuv420pTexture<D3D11_USAGE_IMMUTABLE> yuvTex(
+					d3dDev, 
+					DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
+					GetData<3>(frame.get()));
+
 				Microsoft::WRL::ComPtr<ID3D11Texture2D> texBGRA;
 				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBGRA;
 				Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvBGRA;
@@ -281,73 +299,6 @@ int main() {
 
 				Microsoft::WRL::ComPtr<ID3D11SamplerState> pointSampler;
 				Microsoft::WRL::ComPtr<ID3D11SamplerState> linearSampler;
-
-				// yuv420p tex resources
-				{
-					D3D11_SUBRESOURCE_DATA subResData;
-					D3D11_TEXTURE2D_DESC yuv420pTexDesc;
-					D3D11_SHADER_RESOURCE_VIEW_DESC yuv420pSrvDesc;
-
-					// Y
-					yuv420pTexDesc.Width = decCtx->width;
-					yuv420pTexDesc.Height = decCtx->height;
-					yuv420pTexDesc.MipLevels = 1;
-					yuv420pTexDesc.ArraySize = 1;
-					yuv420pTexDesc.Format = DXGI_FORMAT_R8_UNORM;
-					yuv420pTexDesc.SampleDesc.Count = 1;
-					yuv420pTexDesc.SampleDesc.Quality = 0;
-					yuv420pTexDesc.Usage = D3D11_USAGE_IMMUTABLE;
-					yuv420pTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-					yuv420pTexDesc.CPUAccessFlags = 0;
-					yuv420pTexDesc.MiscFlags = 0;
-
-					subResData.pSysMem = frame->data[0];
-					subResData.SysMemPitch = frame->linesize[0];
-					subResData.SysMemSlicePitch = 0;
-
-					yuv420pSrvDesc.Format = yuv420pTexDesc.Format;
-					yuv420pSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-					yuv420pSrvDesc.Texture2D.MipLevels = yuv420pTexDesc.MipLevels;
-					yuv420pSrvDesc.Texture2D.MostDetailedMip = 0;
-
-					{
-						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
-						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-
-						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvY.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
-
-					//U
-					yuv420pTexDesc.Width = decCtx->width / 2;
-					yuv420pTexDesc.Height = decCtx->height / 2;
-
-					subResData.pSysMem = frame->data[1];
-					subResData.SysMemPitch = frame->linesize[1];
-
-					{
-						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
-						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-
-						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvU.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
-
-					//V
-					subResData.pSysMem = frame->data[2];
-					subResData.SysMemPitch = frame->linesize[2];
-
-					{
-						Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
-						hr = d3dDev->CreateTexture2D(&yuv420pTexDesc, &subResData, tex.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-
-						hr = d3dDev->CreateShaderResourceView(tex.Get(), &yuv420pSrvDesc, srvV.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
-				}
 
 				// bgra tex resources
 				{
@@ -517,9 +468,7 @@ int main() {
 
 				d3dCtx->PSSetShader(yuv420pToRgbaPs.Get(), nullptr, 0);
 				d3dCtx->PSSetSamplers(0, 1, pointSampler.GetAddressOf());
-				d3dCtx->PSSetShaderResources(0, 1, srvY.GetAddressOf());
-				d3dCtx->PSSetShaderResources(1, 1, srvU.GetAddressOf());
-				d3dCtx->PSSetShaderResources(2, 1, srvV.GetAddressOf());
+				yuvTex.SetToContextPS(d3dCtx, 0);
 
 				d3dCtx->Draw(4, 0);
 

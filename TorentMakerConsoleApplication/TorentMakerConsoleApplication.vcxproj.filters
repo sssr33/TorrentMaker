@@ -8,6 +8,7 @@
     <ClInclude Include="ScopedValue.h" />
     <ClInclude Include="FFmpegHelpers.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
+    <ClInclude Include="Texture\Yuv420pTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

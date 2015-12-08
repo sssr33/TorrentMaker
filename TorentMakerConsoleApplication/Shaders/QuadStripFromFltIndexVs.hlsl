@@ -1,4 +1,7 @@
 
+static const float2 TexScale = float2(1.0f, -1.0f);
+static const float2 TexTranslate = float2(0.5f, 0.5f);
+
 // Triangle strip
 static const float2 QuadStrip[4] = { 
 	float2(-0.5f, -0.5f), 
@@ -26,13 +29,7 @@ PsInput main(VsInput input) {
 	output.pos = float4(QuadStrip[input.vertexId], 0.0f, 1.0f);
 	output.pos = mul(output.pos, Transform);
 
-	output.tex = QuadStrip[input.vertexId];
-
-	output.tex.x += 0.5f;
-	output.tex.y -= 0.5f;
-
-	output.tex.y *= -1.0f;
-
+	output.tex = QuadStrip[input.vertexId] * TexScale + TexTranslate;
 
 	return output;
 }
