@@ -8,6 +8,8 @@
 #include "FFmpegHelpers.h"
 #include "DxHelpres\DxDevice.h"
 #include "Texture\Yuv420pTexture.h"
+#include "Texture\Bgra8CopyTexture.h"
+#include "Texture\Bgra8RenderTarget.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -284,10 +286,13 @@ int main() {
 					DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
 					GetData<3>(frame.get()));
 
-				Microsoft::WRL::ComPtr<ID3D11Texture2D> texBGRA;
-				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvBGRA;
-				Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvBGRA;
-				Microsoft::WRL::ComPtr<ID3D11Texture2D> screenTex;
+				Bgra8RenderTarget bgraTex(
+					d3dDev,
+					DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
+					0);
+				Bgra8CopyTexture bgraTexCopy(
+					d3dDev,
+					DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height));
 
 				Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxBuf;
 
@@ -299,63 +304,6 @@ int main() {
 
 				Microsoft::WRL::ComPtr<ID3D11SamplerState> pointSampler;
 				Microsoft::WRL::ComPtr<ID3D11SamplerState> linearSampler;
-
-				// bgra tex resources
-				{
-					D3D11_TEXTURE2D_DESC texDesc;
-					D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-					D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-
-					texDesc.Width = decCtx->width;
-					texDesc.Height = decCtx->height;
-					texDesc.MipLevels = 0;
-					texDesc.ArraySize = 1;
-					texDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-					texDesc.SampleDesc.Count = 1;
-					texDesc.SampleDesc.Quality = 0;
-					texDesc.Usage = D3D11_USAGE_DEFAULT;
-					texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-					texDesc.CPUAccessFlags = 0;
-					texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-					srvDesc.Format = texDesc.Format;
-					srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-					srvDesc.Texture2D.MipLevels = -1;
-					srvDesc.Texture2D.MostDetailedMip = 0;
-
-					rtvDesc.Format = texDesc.Format;
-					rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-					rtvDesc.Texture2D.MipSlice = 0;
-
-					hr = d3dDev->CreateTexture2D(&texDesc, nullptr, texBGRA.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-
-					hr = d3dDev->CreateShaderResourceView(texBGRA.Get(), &srvDesc, srvBGRA.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-
-					hr = d3dDev->CreateRenderTargetView(texBGRA.Get(), &rtvDesc, rtvBGRA.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-				}
-
-				// screen tex
-				{
-					D3D11_TEXTURE2D_DESC texDesc;
-
-					texDesc.Width = decCtx->width;
-					texDesc.Height = decCtx->height;
-					texDesc.MipLevels = 1;
-					texDesc.ArraySize = 1;
-					texDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-					texDesc.SampleDesc.Count = 1;
-					texDesc.SampleDesc.Quality = 0;
-					texDesc.Usage = D3D11_USAGE_STAGING;
-					texDesc.BindFlags = 0;
-					texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-					texDesc.MiscFlags = 0;
-
-					hr = d3dDev->CreateTexture2D(&texDesc, nullptr, screenTex.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-				}
 
 				//flt idx buffer
 				{
@@ -440,18 +388,9 @@ int main() {
 
 				d3dCtx->UpdateSubresource(fltIdxCBuffer.Get(), 0, nullptr, &transform, 0, 0);
 
-				d3dCtx->ClearRenderTargetView(rtvBGRA.Get(), DirectX::Colors::White);
-				d3dCtx->OMSetRenderTargets(1, rtvBGRA.GetAddressOf(), nullptr);
-
-				D3D11_VIEWPORT viewport;
-
-				viewport.Width = (float)decCtx->width;
-				viewport.Height = (float)decCtx->height;
-				viewport.TopLeftX = viewport.TopLeftY = 0.0f;
-				viewport.MinDepth = 0.0f;
-				viewport.MaxDepth = 1.0f;
-
-				d3dCtx->RSSetViewports(1, &viewport);
+				bgraTex.Clear(d3dCtx, DirectX::Colors::White);
+				bgraTex.SetRenderTarget(d3dCtx);
+				bgraTex.SetViewport(d3dCtx);
 
 				d3dCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
@@ -472,12 +411,8 @@ int main() {
 
 				d3dCtx->Draw(4, 0);
 
-				d3dCtx->CopySubresourceRegion(screenTex.Get(), 0, 0, 0, 0, texBGRA.Get(), 0, nullptr);
-
-				D3D11_MAPPED_SUBRESOURCE mappedSubRes;
-				hr = d3dCtx->Map(screenTex.Get(), 0, D3D11_MAP_READ, 0, &mappedSubRes);
-				H::System::ThrowIfFailed(hr);
-
+				bgraTexCopy.Copy(d3dCtx, &bgraTex);
+				auto bgraTexCopyData = bgraTexCopy.Map(d3dCtx);
 				ImageUtils imgUtils;
 
 				auto savePath = H::System::GetPackagePath() + L"screen0.png";
@@ -485,12 +420,10 @@ int main() {
 				auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
 
 				imgUtils.EncodeAllocPixels(encodeFrame.Get(), DirectX::XMUINT2(decCtx->width, decCtx->height), GUID_WICPixelFormat32bppBGRA);
-				imgUtils.EncodePixels(encodeFrame.Get(), decCtx->height, mappedSubRes.RowPitch, mappedSubRes.RowPitch * decCtx->height * 4, mappedSubRes.pData);
+				imgUtils.EncodePixels(encodeFrame.Get(), decCtx->height, bgraTexCopyData.GetRowPitch(), bgraTexCopyData.GetRowPitch() * decCtx->height * 4, bgraTexCopyData.GetData());
 
 				imgUtils.EncodeCommit(encodeFrame.Get());
 				imgUtils.EncodeCommit(encoder.Get());
-
-				d3dCtx->Unmap(screenTex.Get(), 0);
 			}
 
 			if (seekFlags & AVSEEK_FLAG_BYTE) {

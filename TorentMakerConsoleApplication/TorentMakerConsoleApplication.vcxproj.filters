@@ -9,6 +9,10 @@
     <ClInclude Include="FFmpegHelpers.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
     <ClInclude Include="Texture\Yuv420pTexture.h" />
+    <ClInclude Include="Texture\Bgra8CopyTexture.h" />
+    <ClInclude Include="Texture\Bgra8RenderTarget.h" />
+    <ClInclude Include="Texture\Texture2D.h" />
+    <ClInclude Include="DxHelpres\MappedResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -17,6 +21,10 @@
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FFmpegHelpers.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
+    <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
+    <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />
+    <ClCompile Include="Texture\Texture2D.cpp" />
+    <ClCompile Include="DxHelpres\MappedResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />

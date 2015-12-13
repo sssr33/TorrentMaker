@@ -10,8 +10,13 @@ class comptr_vector{
 	static_assert(std::is_base_of<IUnknown, T>::value, "T must inherit from IUnknown");
 	typedef std::vector<T *> vecType;
 public:
-	typedef T ** pointer;
-	typedef T *const * const_pointer;
+	typedef typename std::vector<T *>::pointer pointer;
+	typedef typename std::vector<T *>::const_pointer const_pointer;
+	typedef typename std::vector<T *>::const_reverse_iterator const_reverse_iterator;
+	typedef typename std::vector<T *>::const_iterator const_iterator;
+	typedef typename std::vector<T *>::const_reverse_iterator const_reverse_iterator;
+	typedef typename std::vector<T *>::iterator iterator;
+	typedef typename std::vector<T *>::reverse_iterator reverse_iterator;
 
 	comptr_vector(){
 	}
@@ -52,7 +57,7 @@ public:
 		return *this;
 	}
 
-	const T *&operator[](size_t idx) const{
+	T * const&operator[](size_t idx) const{
 		return this->vec[idx];
 	}
 
@@ -78,6 +83,22 @@ public:
 
 	const_pointer data() const{
 		return this->vec.data();
+	}
+
+	iterator begin() {
+		return this->vec.begin();
+	}
+
+	const_iterator begin() const {
+		return this->vec.begin();
+	}
+
+	iterator end() {
+		return this->vec.end();
+	}
+
+	const_iterator end() const {
+		return this->vec.end();
 	}
 
 	void push_back(const Microsoft::WRL::ComPtr<T> &v){

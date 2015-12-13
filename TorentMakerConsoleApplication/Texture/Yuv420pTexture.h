@@ -1,11 +1,10 @@
 #pragma once
-#include "..\DxHelpres\DxDevice.h"
+#include "Texture2D.h"
 
 #include <libhelpers\H.h>
-#include <libhelpers\Containers\comptr_vector.h>
 
 template<D3D11_USAGE Usage>
-class Yuv420pTexture {
+class Yuv420pTexture : public Texture2DResource {
 public:
 	Yuv420pTexture(ID3D11Device *d3dDev, const DirectX::XMUINT2 &size) {
 		this->CreateTexture(d3dDev, size, nullptr, 0);
@@ -28,16 +27,10 @@ public:
 		this->CreateTexture(d3dDev, size, data.data(), data.size());
 	}
 
-	void Update(const D3D11_SUBRESOURCE_DATA *data, size_t dataCount) {
-
-	}
-
-	void SetToContextPS(ID3D11DeviceContext *d3dCtx, uint32_t startSlot = 0) {
-		d3dCtx->PSSetShaderResources(startSlot, this->srv.size(), this->srv.data());
+	virtual ~Yuv420pTexture() {
 	}
 
 private:
-	comptr_vector<ID3D11ShaderResourceView> srv;
 
 	void CreateTexture(
 		ID3D11Device *d3dDev,
@@ -77,7 +70,7 @@ private:
 		for (uint32_t i = 0; i < ARRAY_SIZE(SizeDiv); i++) {
 			const D3D11_SUBRESOURCE_DATA *subResData = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
-			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvTmp;
+			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
 
 			texDesc.Width = size.x / SizeDiv[i].x;
 			texDesc.Height = size.y / SizeDiv[i].y;
@@ -89,10 +82,10 @@ private:
 			hr = d3dDev->CreateTexture2D(&texDesc, subResData, tex.GetAddressOf());
 			H::System::ThrowIfFailed(hr);
 
-			hr = d3dDev->CreateShaderResourceView(tex.Get(), &srvDesc, srvTmp.GetAddressOf());
+			hr = d3dDev->CreateShaderResourceView(tex.Get(), &srvDesc, srv.GetAddressOf());
 			H::System::ThrowIfFailed(hr);
 
-			this->srv.push_back(srvTmp);
+			this->AddPlane(tex, srv);
 		}
 	}
 };
