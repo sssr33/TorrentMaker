@@ -178,11 +178,15 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DxHelpres\D3dStructWrappers.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
+    <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
     <ClInclude Include="FFmpegHelpers.h" />
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
+    <ClInclude Include="ResourceFactory\DxResources.h" />
+    <ClInclude Include="ResourceFactory\SamplerFactory.h" />
     <ClInclude Include="ScopedValue.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -192,11 +196,14 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Texture\Yuv420pTexture.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
     <ClCompile Include="FFmpegHelpers.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
+    <ClCompile Include="ResourceFactory\DxResources.cpp" />
+    <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />

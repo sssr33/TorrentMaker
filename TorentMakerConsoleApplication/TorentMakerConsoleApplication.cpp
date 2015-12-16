@@ -6,7 +6,8 @@
 #include "FFmpegIoCtx.h"
 #include "ScopedValue.h"
 #include "FFmpegHelpers.h"
-#include "DxHelpres\DxDevice.h"
+#include "DxHelpres\DxHelpers.h"
+#include "ResourceFactory\DxResources.h"
 #include "Texture\Yuv420pTexture.h"
 #include "Texture\Bgra8CopyTexture.h"
 #include "Texture\Bgra8RenderTarget.h"
@@ -278,6 +279,7 @@ int main() {
 				}
 
 				DxDevice dxDev;
+				DxResources dxRes;
 				auto d3dDev = dxDev.GetD3DDevice();
 				auto d3dCtx = dxDev.GetD3DContext();
 
@@ -302,8 +304,8 @@ int main() {
 
 				Microsoft::WRL::ComPtr<ID3D11PixelShader> yuv420pToRgbaPs;
 
-				Microsoft::WRL::ComPtr<ID3D11SamplerState> pointSampler;
-				Microsoft::WRL::ComPtr<ID3D11SamplerState> linearSampler;
+				auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
+				auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
 
 				//flt idx buffer
 				{
@@ -353,30 +355,6 @@ int main() {
 					auto data = H::System::LoadPackageFile(L"Yuv420pToRgbaPS.cso");
 
 					hr = d3dDev->CreatePixelShader(data.data(), data.size(), nullptr, yuv420pToRgbaPs.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-				}
-
-				// samplers
-				{
-					D3D11_SAMPLER_DESC samplerDesc;
-
-					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-					samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-					samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-					samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-					samplerDesc.MinLOD = -FLT_MAX;
-					samplerDesc.MaxLOD = FLT_MAX;
-					samplerDesc.MipLODBias = 0.0f;
-					samplerDesc.MaxAnisotropy = 1;
-					samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-					std::memset(samplerDesc.BorderColor, 0, sizeof(samplerDesc.BorderColor));
-
-					hr = d3dDev->CreateSamplerState(&samplerDesc, pointSampler.GetAddressOf());
-					H::System::ThrowIfFailed(hr);
-
-					samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-
-					hr = d3dDev->CreateSamplerState(&samplerDesc, linearSampler.GetAddressOf());
 					H::System::ThrowIfFailed(hr);
 				}
 

@@ -13,6 +13,10 @@
     <ClInclude Include="Texture\Bgra8RenderTarget.h" />
     <ClInclude Include="Texture\Texture2D.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
+    <ClInclude Include="ResourceFactory\SamplerFactory.h" />
+    <ClInclude Include="DxHelpres\D3dStructWrappers.h" />
+    <ClInclude Include="DxHelpres\DxHelpers.h" />
+    <ClInclude Include="ResourceFactory\DxResources.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -25,6 +29,9 @@
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />
     <ClCompile Include="Texture\Texture2D.cpp" />
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
+    <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
+    <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
+    <ClCompile Include="ResourceFactory\DxResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />
