@@ -65,14 +65,6 @@ public:
 		return this->vec[idx];
 	}
 
-	const T *&operator[](int idx) const{
-		return this->vec[idx];
-	}
-
-	T *&operator[](int idx){
-		return this->vec[idx];
-	}
-
 	size_t size() const{
 		return this->vec.size();
 	}

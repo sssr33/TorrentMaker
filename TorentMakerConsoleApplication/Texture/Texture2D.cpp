@@ -42,7 +42,7 @@ ID3D11ShaderResourceView *Texture2DResource::GetShaderResourceView(uint32_t plan
 }
 
 void Texture2DResource::SetToContextPS(ID3D11DeviceContext *d3dCtx, uint32_t startSlot) {
-	d3dCtx->PSSetShaderResources(startSlot, this->srv.size(), this->srv.data());
+	d3dCtx->PSSetShaderResources(startSlot, (uint32_t)this->srv.size(), this->srv.data());
 }
 
 void Texture2DResource::AddPlane(ID3D11Texture2D *tex, ID3D11ShaderResourceView *srv) {
@@ -75,7 +75,7 @@ void Texture2DRenderTarget::Clear(ID3D11DeviceContext *d3dCtx, const float color
 }
 
 void Texture2DRenderTarget::SetRenderTarget(ID3D11DeviceContext *d3dCtx) {
-	d3dCtx->OMSetRenderTargets(this->rtv.size(), this->rtv.data(), nullptr);
+	d3dCtx->OMSetRenderTargets((uint32_t)this->rtv.size(), this->rtv.data(), nullptr);
 }
 
 void Texture2DRenderTarget::SetViewport(ID3D11DeviceContext *d3dCtx) {
@@ -83,7 +83,7 @@ void Texture2DRenderTarget::SetViewport(ID3D11DeviceContext *d3dCtx) {
 
 	viewports.reserve(this->GetPlaneCount());
 
-	for (size_t i = 0; i < this->GetPlaneCount(); i++) {
+	for (uint32_t i = 0; i < this->GetPlaneCount(); i++) {
 		D3D11_VIEWPORT viewport;
 		auto size = this->GetSize(i);
 
@@ -96,7 +96,7 @@ void Texture2DRenderTarget::SetViewport(ID3D11DeviceContext *d3dCtx) {
 		viewports.push_back(viewport);
 	}
 
-	d3dCtx->RSSetViewports(viewports.size(), viewports.data());
+	d3dCtx->RSSetViewports((uint32_t)viewports.size(), viewports.data());
 }
 
 void Texture2DRenderTarget::AddPlane(ID3D11Texture2D *tex, ID3D11ShaderResourceView *srv, ID3D11RenderTargetView *rtv) {
