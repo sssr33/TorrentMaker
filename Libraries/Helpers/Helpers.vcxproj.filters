@@ -48,6 +48,8 @@
     <ClInclude Include="libhelpers\Timer.h" />
     <ClInclude Include="libhelpers\vector_pool.h" />
     <ClInclude Include="libhelpers\vector_queue.h" />
+    <ClInclude Include="libhelpers\unique_ptr_extensions.h" />
+    <ClInclude Include="libhelpers\ScopedValue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libhelpers\PixelConverter\PixelConverter.cpp" />

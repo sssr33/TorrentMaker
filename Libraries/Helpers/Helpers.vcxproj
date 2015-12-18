@@ -165,6 +165,7 @@
     <ClInclude Include="libhelpers\raw_ptr.h" />
     <ClInclude Include="libhelpers\result.h" />
     <ClInclude Include="libhelpers\ScopedTimer.h" />
+    <ClInclude Include="libhelpers\ScopedValue.h" />
     <ClInclude Include="libhelpers\service\Operation.h" />
     <ClInclude Include="libhelpers\service\Service.h" />
     <ClInclude Include="libhelpers\Text\UriCodec.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="libhelpers\Thread\ThreadTask.h" />
     <ClInclude Include="libhelpers\Thread\ThreadTaskBase.h" />
     <ClInclude Include="libhelpers\Timer.h" />
+    <ClInclude Include="libhelpers\unique_ptr_extensions.h" />
     <ClInclude Include="libhelpers\vector_pool.h" />
     <ClInclude Include="libhelpers\vector_queue.h" />
     <ClInclude Include="libhelpers\WinRT\HDataWinRT.h" />

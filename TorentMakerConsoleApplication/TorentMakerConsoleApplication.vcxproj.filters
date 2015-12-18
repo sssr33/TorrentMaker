@@ -5,8 +5,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
     <ClInclude Include="FFmpegIoCtx.h" />
-    <ClInclude Include="ScopedValue.h" />
-    <ClInclude Include="FFmpegHelpers.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
     <ClInclude Include="Texture\Yuv420pTexture.h" />
     <ClInclude Include="Texture\Bgra8CopyTexture.h" />
@@ -17,13 +15,16 @@
     <ClInclude Include="DxHelpres\D3dStructWrappers.h" />
     <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="ResourceFactory\DxResources.h" />
+    <ClInclude Include="Helpers\FFmpegHelpers.h" />
+    <ClInclude Include="Helpers\FileIterator.h" />
+    <ClInclude Include="Helpers\Deleters.h" />
+    <ClInclude Include="Helpers\MiscHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TorentMakerConsoleApplication.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
-    <ClCompile Include="FFmpegHelpers.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />
@@ -32,6 +33,10 @@
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
     <ClCompile Include="ResourceFactory\DxResources.cpp" />
+    <ClCompile Include="Helpers\FFmpegHelpers.cpp" />
+    <ClCompile Include="Helpers\FileIterator.cpp" />
+    <ClCompile Include="Helpers\Deleters.cpp" />
+    <ClCompile Include="Helpers\MiscHelpers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />
