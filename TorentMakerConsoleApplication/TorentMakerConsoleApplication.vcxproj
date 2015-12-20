@@ -196,6 +196,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Texture\Bgra8RenderTarget.h" />
     <ClInclude Include="Texture\Texture2D.h" />
     <ClInclude Include="Texture\Yuv420pTexture.h" />
+    <ClInclude Include="SequentialVideoFrameReader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
@@ -214,6 +215,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />
     <ClCompile Include="Texture\Texture2D.cpp" />
     <ClCompile Include="TorentMakerConsoleApplication.cpp" />
+    <ClCompile Include="SequentialVideoFrameReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Libraries\Helpers\Helpers.vcxproj">

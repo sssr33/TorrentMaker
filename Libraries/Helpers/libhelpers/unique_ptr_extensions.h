@@ -33,3 +33,8 @@ template<class T, class D>
 std::unique_ptr<T, D> WrapUnique(T *ptr, const D &deleter) {
 	return std::unique_ptr<T, D>(ptr, deleter);
 }
+
+template<class T, class D>
+void MakeUnique(std::unique_ptr<T, D> &v, T *ptr) {
+	v = std::unique_ptr<T, D>(ptr);
+}

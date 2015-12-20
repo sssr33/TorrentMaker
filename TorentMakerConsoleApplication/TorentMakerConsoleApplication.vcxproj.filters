@@ -19,6 +19,7 @@
     <ClInclude Include="Helpers\FileIterator.h" />
     <ClInclude Include="Helpers\Deleters.h" />
     <ClInclude Include="Helpers\MiscHelpers.h" />
+    <ClInclude Include="SequentialVideoFrameReader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="Helpers\FileIterator.cpp" />
     <ClCompile Include="Helpers\Deleters.cpp" />
     <ClCompile Include="Helpers\MiscHelpers.cpp" />
+    <ClCompile Include="SequentialVideoFrameReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />

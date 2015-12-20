@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "FileDialogEventsImpl.h"
 #include "FFmpegIoCtx.h"
+#include "SequentialVideoFrameReader.h"
 #include "DxHelpres\DxHelpers.h"
 #include "ResourceFactory\DxResources.h"
 #include "Texture\Yuv420pTexture.h"
@@ -99,152 +100,20 @@ int main() {
 
 				// TODO test memleak on .zip or another unsupported files.
 
-				int ffmpegRes = 0;
-				FFmpegIoCtx ioCtx(filePath);
+				SequentialVideoFrameReader videoReader(filePath);
+				uint32_t photoCount = 10;
+				uint64_t timeStep = videoReader.GetProgressDelta() / (photoCount + 2); // +2 for begin, end
+				uint64_t endTime = videoReader.GetProgressDelta() - timeStep;
 
-				auto fmtCtx = WrapUnique(avformat_alloc_context(), [](AVFormatContext *v) { avformat_close_input(&v); });
-				fmtCtx->pb = ioCtx.GetAvioCtx();
-
-				auto tmpNameUtf8 = H::Text::ConvertToUTF8(L"anykey" + ioCtx.GetExtension());
-
-				ffmpegRes = avformat_open_input(GetAddressOf(fmtCtx), tmpNameUtf8.c_str(), nullptr, nullptr);
-				FFmpegHelpers::ThrowIfFFmpegFailed(ffmpegRes);
-
-				ffmpegRes = avformat_find_stream_info(fmtCtx.get(), nullptr);
-				FFmpegHelpers::ThrowIfFFmpegFailed(ffmpegRes);
-
-				av_format_inject_global_side_data(fmtCtx.get());
-
-				AVCodec *dec = nullptr;
-				auto decCtx = WrapUnique((AVCodecContext *)nullptr, [](AVCodecContext *v) { avcodec_close(v); });
-				auto videoStreamIdx = av_find_best_stream(fmtCtx.get(), AVMediaType::AVMEDIA_TYPE_VIDEO, -1, -1, &dec, 0);
-				FFmpegHelpers::ThrowIfFFmpegFailed(videoStreamIdx);
-
-				AVStream *stream = fmtCtx->streams[videoStreamIdx];
-
-				for (int i = 0; i < (int)fmtCtx->nb_streams; i++) {
-					auto stream = fmtCtx->streams[i];
-
-					if (i != videoStreamIdx) {
-						stream->discard = AVDISCARD_ALL;
-					}
-					else {
-						stream->discard = AVDISCARD_DEFAULT;
-
-						decCtx.reset(stream->codec);
-						ffmpegRes = avcodec_open2(decCtx.get(), dec, nullptr);
-						FFmpegHelpers::ThrowIfFFmpegFailed(ffmpegRes);
-					}
-				}
-
-				int photoCount = 10;
-				int64_t duration = AV_NOPTS_VALUE;
-				AVRational durationUnits, streamUnits;
-				int seekFlags = 0;
-				int seekStreamIdx = -1;
-
-				auto frame = WrapUnique(av_frame_alloc(), [](AVFrame *v) { av_frame_free(&v); });
-				int64_t latestPts = 0;
-
-				// TODO add stream_time support for seeking
-				if (fmtCtx->duration < 0) {
-					if (stream->duration < 0) {
-						duration = avio_size(fmtCtx->pb);
-						durationUnits.den = durationUnits.num = 1;
-						streamUnits.den = streamUnits.num = 1;
-						seekFlags |= AVSEEK_FLAG_BYTE;
-					}
-					else {
-						duration = stream->duration;
-						durationUnits = stream->time_base;
-						streamUnits = stream->time_base;
-						seekStreamIdx = videoStreamIdx;
-					}
-				}
-				else {
-					duration = fmtCtx->duration;
-					durationUnits = FFmpegHelpers::AVTimeBaseQ;
-					streamUnits = stream->time_base;
-				}
-
-				int64_t timeStep = duration / (photoCount + 2); // +2 for begin, end
-				int64_t endTime = duration - timeStep;
+				videoReader.IncrementProgress(timeStep);
 
 				// TODO add logic for handling files with 0 duration(images and even .txt(! yes ffmpeg can hadle this))
 				//int photo = 0;
 
-				for (int64_t time = timeStep; time < endTime; time += timeStep) {
-					int64_t framePts = 0;
-					int64_t curPts = 0;
-					int64_t dstPts = av_rescale_q_rnd(time, durationUnits, streamUnits, AV_ROUND_UP);
-					int droppedFrames = 0;
-
-					if (!(seekFlags & AVSEEK_FLAG_BYTE)) {
-						avcodec_flush_buffers(decCtx.get());
-						ffmpegRes = av_seek_frame(fmtCtx.get(), seekStreamIdx, time, seekFlags);
-						FFmpegHelpers::ThrowIfFFmpegFailed(ffmpegRes);
-
-						/*if (FFmpegHelpers::IsFFmpegFailed(ffmpegRes)) {
-							std::cout << std::endl;
-							std::cout << "WARNING: av_seek_frame failed. Trying to read something may be slow :( or even crash x(";
-							std::cout << std::endl;
-						}*/
-					}
-
-					while (curPts < dstPts) {
-						int gotFrame = 0;
-						auto pkt = FFmpegHelpers::MakePacket(); // very important to use new pkt for each av_read_frame to avoid memory leak
-
-						if (av_read_frame(fmtCtx.get(), &pkt) >= 0) {
-							auto origPktScoped = MakeScopedValue(pkt, [](AVPacket *v) { av_packet_unref(v); });
-
-							if (pkt.pts != AV_NOPTS_VALUE) {
-								latestPts = pkt.pts;
-							}
-
-							if (seekFlags & AVSEEK_FLAG_BYTE && pkt.pos < dstPts) {
-								continue;
-							}
-
-							if (pkt.stream_index == videoStreamIdx) {
-								do {
-									int ret = 0;
-									{
-										ret = avcodec_decode_video2(decCtx.get(), frame.get(), &gotFrame, &pkt);
-
-										if (gotFrame) {
-											framePts = av_frame_get_best_effort_timestamp(frame.get());
-
-											if (seekFlags & AVSEEK_FLAG_BYTE) {
-												curPts = pkt.pos;
-											}
-											else {
-												curPts = framePts;
-											}
-
-											if (curPts < dstPts) {
-												droppedFrames++;
-											}
-											else {
-												std::cout << "Dropped frames: " << droppedFrames << std::endl;
-												std::cout << "Frame pts: " << curPts << " Target pts: " << dstPts << std::endl;
-											}
-										}
-									}
-
-									if (ret < 0) {
-										break;
-									}
-
-									pkt.data += ret;
-									pkt.size -= ret;
-								} while (pkt.size > 0);
-							}
-						}
-					}
-
+				for (; videoReader.GetProgress() < endTime; videoReader.IncrementProgress(timeStep)) {
 					// TODO add logic when frame is empty
 
+					auto frame = videoReader.GetFrame();
 					DxDevice dxDev;
 					DxResources dxRes;
 					auto d3dDev = dxDev.GetD3DDevice();
@@ -253,7 +122,7 @@ int main() {
 					Yuv420pTexture<D3D11_USAGE_IMMUTABLE> yuvTex(
 						d3dDev,
 						DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
-						FFmpegHelpers::GetData<3>(frame.get()));
+						FFmpegHelpers::GetData<3>(frame));
 
 					Bgra8RenderTarget bgraTex(
 						d3dDev,
@@ -364,34 +233,20 @@ int main() {
 					auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
 					auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
 
-					imgUtils.EncodeAllocPixels(encodeFrame.Get(), DirectX::XMUINT2(decCtx->width, decCtx->height), GUID_WICPixelFormat32bppBGRA);
-					imgUtils.EncodePixels(encodeFrame.Get(), decCtx->height, bgraTexCopyData.GetRowPitch(), bgraTexCopyData.GetRowPitch() * decCtx->height * 4, bgraTexCopyData.GetData());
+					imgUtils.EncodeAllocPixels(encodeFrame.Get(), DirectX::XMUINT2(frame->width, frame->height), GUID_WICPixelFormat32bppBGRA);
+					imgUtils.EncodePixels(encodeFrame.Get(), frame->height, bgraTexCopyData.GetRowPitch(), bgraTexCopyData.GetRowPitch() * frame->height * 4, bgraTexCopyData.GetData());
 
 					imgUtils.EncodeCommit(encodeFrame.Get());
 					imgUtils.EncodeCommit(encoder.Get());
 				}
 
-				if (seekFlags & AVSEEK_FLAG_BYTE) {
-					int readResult = 0;
+				auto videoInfo = videoReader.End();
 
-					while (readResult >= 0) {
-						auto pkt = FFmpegHelpers::MakePacket();
+				double durationSec =
+					(double)(videoInfo.duration * videoInfo.durationUnits.num) /
+					(double)videoInfo.durationUnits.den;
 
-						readResult = av_read_frame(fmtCtx.get(), &pkt);
-
-						if (readResult >= 0) {
-							auto origPktScoped = MakeScopedValue(pkt, [](AVPacket *v) { av_packet_unref(v); });
-
-							if (pkt.stream_index == videoStreamIdx && pkt.pts != AV_NOPTS_VALUE) {
-								latestPts = pkt.pts;
-							}
-						}
-					}
-
-					duration = latestPts;
-					durationUnits = stream->time_base;
-				}
-
+				std::cout << "Duration(s): " << durationSec << std::endl;
 				std::cout << std::endl;
 			}
 			catch (...) {
