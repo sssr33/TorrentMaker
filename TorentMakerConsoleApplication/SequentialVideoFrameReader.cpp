@@ -68,16 +68,42 @@ SequentialVideoFrameReader::SequentialVideoFrameReader(const std::wstring &path)
 	}
 }
 
-//SequentialVideoFrameReader::SequentialVideoFrameReader(SequentialVideoFrameReader &&other) {
-//
-//}
+SequentialVideoFrameReader::SequentialVideoFrameReader(SequentialVideoFrameReader &&other) 
+ : ioCtx(std::move(other.ioCtx)), fmtCtx(std::move(other.fmtCtx)), 
+	decCtx(std::move(other.decCtx)), frame(std::move(other.frame)),
+	duration(std::move(other.duration)), durationUnits(std::move(other.durationUnits)),
+	streamUnits(std::move(other.streamUnits)), seekFlags(std::move(other.seekFlags)),
+	seekStreamIdx(std::move(other.seekStreamIdx)), videoStreamIdx(std::move(other.videoStreamIdx)),
+	progress(std::move(other.progress)), frameDirty(std::move(other.frameDirty)),
+	latestPts(std::move(other.latestPts))
+{
+	other.frameDirty = false;
+}
 
 SequentialVideoFrameReader::~SequentialVideoFrameReader() {
 }
 
-//SequentialVideoFrameReader &SequentialVideoFrameReader::operator=(SequentialVideoFrameReader &&other) {
-//
-//}
+SequentialVideoFrameReader &SequentialVideoFrameReader::operator=(SequentialVideoFrameReader &&other) {
+	if (this != &other) {
+		this->ioCtx = std::move(other.ioCtx);
+		this->fmtCtx = std::move(other.fmtCtx);
+		this->decCtx = std::move(other.decCtx); 
+		this->frame = std::move(other.frame);
+		this->duration = std::move(other.duration);
+		this->durationUnits = std::move(other.durationUnits);
+		this->streamUnits = std::move(other.streamUnits); 
+		this->seekFlags = std::move(other.seekFlags);
+		this->seekStreamIdx = std::move(other.seekStreamIdx); 
+		this->videoStreamIdx = std::move(other.videoStreamIdx);
+		this->progress = std::move(other.progress); 
+		this->frameDirty = std::move(other.frameDirty);
+		this->latestPts = std::move(other.latestPts);
+
+		other.frameDirty = false;
+	}
+
+	return *this;
+}
 
 uint64_t SequentialVideoFrameReader::GetProgress() const {
 	return this->progress;

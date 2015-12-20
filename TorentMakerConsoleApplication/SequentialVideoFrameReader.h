@@ -19,10 +19,10 @@ public:
 	NO_COPY(SequentialVideoFrameReader);
 
 	SequentialVideoFrameReader(const std::wstring &path);
-	//SequentialVideoFrameReader(SequentialVideoFrameReader &&other);
+	SequentialVideoFrameReader(SequentialVideoFrameReader &&other);
 	~SequentialVideoFrameReader();
 
-	//SequentialVideoFrameReader &operator=(SequentialVideoFrameReader &&other);
+	SequentialVideoFrameReader &operator=(SequentialVideoFrameReader &&other);
 
 	uint64_t GetProgress() const;
 	uint64_t GetProgressDelta() const;
