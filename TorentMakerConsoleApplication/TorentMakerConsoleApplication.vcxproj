@@ -190,6 +190,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Helpers\MiscHelpers.h" />
     <ClInclude Include="ResourceFactory\DxResources.h" />
     <ClInclude Include="ResourceFactory\SamplerFactory.h" />
+    <ClInclude Include="ResourceFactory\ShaderFactory.h" />
+    <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture\Bgra8CopyTexture.h" />
@@ -210,6 +212,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="Helpers\MiscHelpers.cpp" />
     <ClCompile Include="ResourceFactory\DxResources.cpp" />
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
+    <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
+    <ClCompile Include="Shaders\Yuv420pToRgbaPS.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />

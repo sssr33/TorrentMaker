@@ -28,7 +28,7 @@ public:
 
 	ID3D11ShaderResourceView *GetShaderResourceView(uint32_t plane = 0) const;
 
-	void SetToContextPS(ID3D11DeviceContext *d3dCtx, uint32_t startSlot = 0);
+	void SetToContextPS(ID3D11DeviceContext *d3dCtx, uint32_t startSlot = 0) const;
 
 protected:
 	void AddPlane(ID3D11Texture2D *tex, ID3D11ShaderResourceView *srv);
@@ -49,10 +49,10 @@ public:
 
 	ID3D11RenderTargetView *GetRenderTargetView(uint32_t plane = 0) const;
 
-	void Clear(ID3D11DeviceContext *d3dCtx, const float color[4] = DirectX::Colors::Black);
-	void SetRenderTarget(ID3D11DeviceContext *d3dCtx);
+	void Clear(ID3D11DeviceContext *d3dCtx, const float color[4] = DirectX::Colors::Black) const;
+	void SetRenderTarget(ID3D11DeviceContext *d3dCtx) const;
 	// TODO refactoring for textures with static count of planes
-	void SetViewport(ID3D11DeviceContext *d3dCtx);
+	void SetViewport(ID3D11DeviceContext *d3dCtx) const;
 
 protected:
 	void AddPlane(ID3D11Texture2D *tex, ID3D11ShaderResourceView *srv, ID3D11RenderTargetView *rtv);

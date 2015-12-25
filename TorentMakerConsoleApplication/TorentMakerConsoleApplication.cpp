@@ -138,7 +138,7 @@ int main() {
 					Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxCBuffer;
 					Microsoft::WRL::ComPtr<ID3D11VertexShader> fltIdxVs;
 
-					Microsoft::WRL::ComPtr<ID3D11PixelShader> yuv420pToRgbaPs;
+					auto yuv420pToRgbaPs = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
 
 					auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
 					auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
@@ -186,14 +186,6 @@ int main() {
 						H::System::ThrowIfFailed(hr);
 					}
 
-					// yuv420pToRgbaPs
-					{
-						auto data = H::System::LoadPackageFile(L"Yuv420pToRgbaPS.cso");
-
-						hr = d3dDev->CreatePixelShader(data.data(), data.size(), nullptr, yuv420pToRgbaPs.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
-
 					DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
 
 					transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixScaling(2, 2, 1));
@@ -219,9 +211,7 @@ int main() {
 					d3dCtx->VSSetConstantBuffers(0, 1, fltIdxCBuffer.GetAddressOf());
 					d3dCtx->VSSetShader(fltIdxVs.Get(), nullptr, 0);
 
-					d3dCtx->PSSetShader(yuv420pToRgbaPs.Get(), nullptr, 0);
-					d3dCtx->PSSetSamplers(0, 1, pointSampler.GetAddressOf());
-					yuvTex.SetToContextPS(d3dCtx, 0);
+					yuv420pToRgbaPs->SetToContext(d3dCtx, yuvTex, pointSampler);
 
 					d3dCtx->Draw(4, 0);
 

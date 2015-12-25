@@ -20,6 +20,8 @@
     <ClInclude Include="Helpers\Deleters.h" />
     <ClInclude Include="Helpers\MiscHelpers.h" />
     <ClInclude Include="SequentialVideoFrameReader.h" />
+    <ClInclude Include="ResourceFactory\ShaderFactory.h" />
+    <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -39,6 +41,8 @@
     <ClCompile Include="Helpers\Deleters.cpp" />
     <ClCompile Include="Helpers\MiscHelpers.cpp" />
     <ClCompile Include="SequentialVideoFrameReader.cpp" />
+    <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
+    <ClCompile Include="Shaders\Yuv420pToRgbaPS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
