@@ -41,7 +41,7 @@
     <ClCompile Include="SequentialVideoFrameReader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Yuv420pToRgbaPS.hlsl" />
-    <FxCompile Include="Shaders\QuadStripFromFltIndexVs.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\QuadStripFromFltIndexVs.hlsl" />
   </ItemGroup>
 </Project>
