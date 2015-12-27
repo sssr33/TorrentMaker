@@ -184,13 +184,17 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="DxHelpres\MappedResource.h" />
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
+    <ClInclude Include="Geometry\QuadStripFltIdx.h" />
     <ClInclude Include="Helpers\Deleters.h" />
     <ClInclude Include="Helpers\FFmpegHelpers.h" />
     <ClInclude Include="Helpers\FileIterator.h" />
     <ClInclude Include="Helpers\MiscHelpers.h" />
     <ClInclude Include="ResourceFactory\DxResources.h" />
+    <ClInclude Include="ResourceFactory\GeometryFactory.h" />
+    <ClInclude Include="ResourceFactory\InputAssembler.h" />
     <ClInclude Include="ResourceFactory\SamplerFactory.h" />
     <ClInclude Include="ResourceFactory\ShaderFactory.h" />
+    <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
     <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -206,13 +210,17 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
+    <ClCompile Include="Geometry\QuadStripFltIdx.cpp" />
     <ClCompile Include="Helpers\Deleters.cpp" />
     <ClCompile Include="Helpers\FFmpegHelpers.cpp" />
     <ClCompile Include="Helpers\FileIterator.cpp" />
     <ClCompile Include="Helpers\MiscHelpers.cpp" />
     <ClCompile Include="ResourceFactory\DxResources.cpp" />
+    <ClCompile Include="ResourceFactory\GeometryFactory.cpp" />
+    <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
+    <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
     <ClCompile Include="Shaders\Yuv420pToRgbaPS.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
@@ -227,7 +235,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\Hlsl\QuadStripFromFltIndexVs.hlsl">
+    <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

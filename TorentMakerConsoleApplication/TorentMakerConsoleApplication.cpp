@@ -132,59 +132,15 @@ int main() {
 						d3dDev,
 						DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height));
 
-					Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxBuf;
+					auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
+					
+					auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
+					auto vsCBuffer = vs->CreateCBuffer(d3dDev);
 
-					Microsoft::WRL::ComPtr<ID3D11InputLayout> fltIdxInputLayout;
-					Microsoft::WRL::ComPtr<ID3D11Buffer> fltIdxCBuffer;
-					Microsoft::WRL::ComPtr<ID3D11VertexShader> fltIdxVs;
-
-					auto yuv420pToRgbaPs = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
+					auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
 
 					auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
 					auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
-
-					//flt idx buffer
-					{
-						float idx[] = { 0, 1, 2, 3 };
-						D3D11_BUFFER_DESC bufDesc;
-						D3D11_SUBRESOURCE_DATA subResData;
-
-						bufDesc.ByteWidth = sizeof(idx);
-						bufDesc.Usage = D3D11_USAGE_IMMUTABLE;
-						bufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-						bufDesc.CPUAccessFlags = 0;
-						bufDesc.MiscFlags = 0;
-						bufDesc.StructureByteStride = 0;
-
-						subResData.pSysMem = idx;
-						subResData.SysMemPitch = 0;
-						subResData.SysMemSlicePitch = 0;
-
-						hr = d3dDev->CreateBuffer(&bufDesc, &subResData, fltIdxBuf.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-
-						bufDesc.ByteWidth = sizeof(DirectX::XMMATRIX);
-						bufDesc.Usage = D3D11_USAGE_DEFAULT;
-						bufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-						hr = d3dDev->CreateBuffer(&bufDesc, &subResData, fltIdxCBuffer.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
-
-					// fltIdxVs
-					{
-						auto data = H::System::LoadPackageFile(L"QuadStripFromFltIndexVs.cso");
-
-						hr = d3dDev->CreateVertexShader(data.data(), data.size(), nullptr, fltIdxVs.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-
-						D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-							{ "POSITION", 0, DXGI_FORMAT_R32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-						};
-
-						hr = d3dDev->CreateInputLayout(inputDesc, ARRAY_SIZE(inputDesc), data.data(), data.size(), fltIdxInputLayout.GetAddressOf());
-						H::System::ThrowIfFailed(hr);
-					}
 
 					DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
 
@@ -192,28 +148,17 @@ int main() {
 					transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixTranslation(0, 0, 1));
 					transform = DirectX::XMMatrixTranspose(transform);
 
-					d3dCtx->UpdateSubresource(fltIdxCBuffer.Get(), 0, nullptr, &transform, 0, 0);
+					vsCBuffer.Update(d3dCtx, transform);
 
 					bgraTex.Clear(d3dCtx, DirectX::Colors::White);
 					bgraTex.SetRenderTarget(d3dCtx);
 					bgraTex.SetViewport(d3dCtx);
 
-					d3dCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+					InputAssembler::Set(d3dCtx, *geometry, *vs, vsCBuffer);
 
-					{
-						uint32_t stride = 4;
-						uint32_t offset = 0;
-						d3dCtx->IASetVertexBuffers(0, 1, fltIdxBuf.GetAddressOf(), &stride, &offset);
-					}
+					ps->SetToContext(d3dCtx, yuvTex, pointSampler);
 
-					d3dCtx->IASetInputLayout(fltIdxInputLayout.Get());
-
-					d3dCtx->VSSetConstantBuffers(0, 1, fltIdxCBuffer.GetAddressOf());
-					d3dCtx->VSSetShader(fltIdxVs.Get(), nullptr, 0);
-
-					yuv420pToRgbaPs->SetToContext(d3dCtx, yuvTex, pointSampler);
-
-					d3dCtx->Draw(4, 0);
+					d3dCtx->Draw(geometry->GetVertexCount(), 0);
 
 					bgraTexCopy.Copy(d3dCtx, &bgraTex);
 					auto bgraTexCopyData = bgraTexCopy.Map(d3dCtx);

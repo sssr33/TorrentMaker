@@ -22,6 +22,10 @@
     <ClInclude Include="SequentialVideoFrameReader.h" />
     <ClInclude Include="ResourceFactory\ShaderFactory.h" />
     <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
+    <ClInclude Include="Geometry\QuadStripFltIdx.h" />
+    <ClInclude Include="ResourceFactory\GeometryFactory.h" />
+    <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
+    <ClInclude Include="ResourceFactory\InputAssembler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -43,9 +47,13 @@
     <ClCompile Include="SequentialVideoFrameReader.cpp" />
     <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
     <ClCompile Include="Shaders\Yuv420pToRgbaPS.cpp" />
+    <ClCompile Include="Geometry\QuadStripFltIdx.cpp" />
+    <ClCompile Include="ResourceFactory\GeometryFactory.cpp" />
+    <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
+    <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
-    <FxCompile Include="Shaders\Hlsl\QuadStripFromFltIndexVs.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl" />
   </ItemGroup>
 </Project>
