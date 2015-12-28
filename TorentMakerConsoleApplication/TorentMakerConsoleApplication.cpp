@@ -29,12 +29,6 @@ extern "C" {
 }
 
 int main() {
-	while (true)
-	{
-		Window wnd;
-		Window wnd2;
-	}
-
 	HRESULT hr = S_OK;
 
 	av_register_all();
