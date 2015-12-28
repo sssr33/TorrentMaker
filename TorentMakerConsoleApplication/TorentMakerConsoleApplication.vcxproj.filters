@@ -28,6 +28,7 @@
     <ClInclude Include="ResourceFactory\InputAssembler.h" />
     <ClInclude Include="Texture\TextureUpdater.h" />
     <ClInclude Include="Texture\TextureCpuAccess.h" />
+    <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -53,6 +54,7 @@
     <ClCompile Include="ResourceFactory\GeometryFactory.cpp" />
     <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
     <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
+    <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />

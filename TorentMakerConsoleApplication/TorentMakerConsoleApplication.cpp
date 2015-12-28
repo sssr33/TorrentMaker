@@ -12,6 +12,7 @@
 #include "Texture\Bgra8RenderTarget.h"
 #include "Helpers\FFmpegHelpers.h"
 #include "Helpers\FileIterator.h"
+#include "Window\Window.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -28,6 +29,12 @@ extern "C" {
 }
 
 int main() {
+	while (true)
+	{
+		Window wnd;
+		Window wnd2;
+	}
+
 	HRESULT hr = S_OK;
 
 	av_register_all();
