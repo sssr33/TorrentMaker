@@ -112,17 +112,18 @@ int main() {
 				auto d3dDev = dxDev.GetD3DDevice();
 				auto d3dCtx = dxDev.GetD3DContext();
 
+				const auto frameSize = videoReader.GetFrameSize();
 				Yuv420pTexture<D3D11_USAGE_DYNAMIC> yuvTex(
 					d3dDev,
-					videoReader.GetFrameSize());
+					frameSize);
 
 				Bgra8RenderTarget bgraTex(
 					d3dDev,
-					videoReader.GetFrameSize(),
+					frameSize,
 					0);
 				Bgra8CopyTexture bgraTexCopy(
 					d3dDev,
-					videoReader.GetFrameSize());
+					frameSize);
 
 				auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
 
@@ -148,7 +149,6 @@ int main() {
 					auto frame = videoReader.GetFrame();
 
 					yuvTex.Update(d3dCtx, FFmpegHelpers::GetData<3>(frame));
-
 					vsCBuffer.Update(d3dCtx, transform);
 
 					bgraTex.Clear(d3dCtx, DirectX::Colors::White);
@@ -156,7 +156,6 @@ int main() {
 					bgraTex.SetViewport(d3dCtx);
 
 					InputAssembler::Set(d3dCtx, *geometry, *vs, vsCBuffer);
-
 					ps->SetToContext(d3dCtx, yuvTex, pointSampler);
 
 					d3dCtx->Draw(geometry->GetVertexCount(), 0);
@@ -169,8 +168,12 @@ int main() {
 					auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
 					auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
 
-					imgUtils.EncodeAllocPixels(encodeFrame.Get(), DirectX::XMUINT2(frame->width, frame->height), GUID_WICPixelFormat32bppBGRA);
-					imgUtils.EncodePixels(encodeFrame.Get(), frame->height, bgraTexCopyData.GetRowPitch(), bgraTexCopyData.GetRowPitch() * frame->height * 4, bgraTexCopyData.GetData());
+					imgUtils.EncodeAllocPixels(encodeFrame.Get(), frameSize, GUID_WICPixelFormat32bppBGRA);
+					imgUtils.EncodePixels(
+						encodeFrame.Get(), frameSize.y, 
+						bgraTexCopyData.GetRowPitch(), 
+						bgraTexCopyData.GetRowPitch() * frameSize.y * 4, 
+						bgraTexCopyData.GetData());
 
 					imgUtils.EncodeCommit(encodeFrame.Get());
 					imgUtils.EncodeCommit(encoder.Get());
