@@ -114,6 +114,15 @@ uint64_t SequentialVideoFrameReader::GetProgressDelta() const {
 	return delta;
 }
 
+DirectX::XMUINT2 SequentialVideoFrameReader::GetFrameSize() const {
+	DirectX::XMUINT2 size;
+
+	size.x = (uint32_t)this->decCtx->width;
+	size.y = (uint32_t)this->decCtx->height;
+
+	return size;
+}
+
 void SequentialVideoFrameReader::IncrementProgress(uint64_t v) {
 	this->progress =
 		H::Math::Clamp(this->progress + v, 0ULL, this->GetProgressDelta());

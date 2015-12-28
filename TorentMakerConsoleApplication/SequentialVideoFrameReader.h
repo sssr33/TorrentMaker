@@ -26,6 +26,8 @@ public:
 
 	uint64_t GetProgress() const;
 	uint64_t GetProgressDelta() const;
+	DirectX::XMUINT2 GetFrameSize() const;
+
 	void IncrementProgress(uint64_t v);
 
 	AVFrame *GetFrame();

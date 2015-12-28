@@ -26,6 +26,8 @@
     <ClInclude Include="ResourceFactory\GeometryFactory.h" />
     <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
     <ClInclude Include="ResourceFactory\InputAssembler.h" />
+    <ClInclude Include="Texture\TextureUpdater.h" />
+    <ClInclude Include="Texture\TextureCpuAccess.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

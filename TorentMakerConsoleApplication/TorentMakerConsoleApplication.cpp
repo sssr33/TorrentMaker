@@ -106,47 +106,48 @@ int main() {
 				uint64_t endTime = videoReader.GetProgressDelta() - timeStep;
 
 				videoReader.IncrementProgress(timeStep);
+				
+				DxDevice dxDev;
+				DxResources dxRes;
+				auto d3dDev = dxDev.GetD3DDevice();
+				auto d3dCtx = dxDev.GetD3DContext();
+
+				Yuv420pTexture<D3D11_USAGE_DYNAMIC> yuvTex(
+					d3dDev,
+					videoReader.GetFrameSize());
+
+				Bgra8RenderTarget bgraTex(
+					d3dDev,
+					videoReader.GetFrameSize(),
+					0);
+				Bgra8CopyTexture bgraTexCopy(
+					d3dDev,
+					videoReader.GetFrameSize());
+
+				auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
+
+				auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
+				auto vsCBuffer = vs->CreateCBuffer(d3dDev);
+
+				auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
+
+				auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
+				auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
+
+				DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
+
+				transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixScaling(2, 2, 1));
+				transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixTranslation(0, 0, 1));
+				transform = DirectX::XMMatrixTranspose(transform);
 
 				// TODO add logic for handling files with 0 duration(images and even .txt(! yes ffmpeg can hadle this))
 				//int photo = 0;
 
 				for (; videoReader.GetProgress() < endTime; videoReader.IncrementProgress(timeStep)) {
 					// TODO add logic when frame is empty
-
 					auto frame = videoReader.GetFrame();
-					DxDevice dxDev;
-					DxResources dxRes;
-					auto d3dDev = dxDev.GetD3DDevice();
-					auto d3dCtx = dxDev.GetD3DContext();
 
-					Yuv420pTexture<D3D11_USAGE_IMMUTABLE> yuvTex(
-						d3dDev,
-						DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
-						FFmpegHelpers::GetData<3>(frame));
-
-					Bgra8RenderTarget bgraTex(
-						d3dDev,
-						DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height),
-						0);
-					Bgra8CopyTexture bgraTexCopy(
-						d3dDev,
-						DirectX::XMUINT2((uint32_t)frame->width, (uint32_t)frame->height));
-
-					auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
-					
-					auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
-					auto vsCBuffer = vs->CreateCBuffer(d3dDev);
-
-					auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
-
-					auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
-					auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
-
-					DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
-
-					transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixScaling(2, 2, 1));
-					transform = DirectX::XMMatrixMultiply(transform, DirectX::XMMatrixTranslation(0, 0, 1));
-					transform = DirectX::XMMatrixTranspose(transform);
+					yuvTex.Update(d3dCtx, FFmpegHelpers::GetData<3>(frame));
 
 					vsCBuffer.Update(d3dCtx, transform);
 

@@ -201,6 +201,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Texture\Bgra8CopyTexture.h" />
     <ClInclude Include="Texture\Bgra8RenderTarget.h" />
     <ClInclude Include="Texture\Texture2D.h" />
+    <ClInclude Include="Texture\TextureCpuAccess.h" />
+    <ClInclude Include="Texture\TextureUpdater.h" />
     <ClInclude Include="Texture\Yuv420pTexture.h" />
     <ClInclude Include="SequentialVideoFrameReader.h" />
   </ItemGroup>

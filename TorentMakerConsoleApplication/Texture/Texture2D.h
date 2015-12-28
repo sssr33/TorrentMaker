@@ -1,5 +1,6 @@
 #pragma once
 #include "..\DxHelpres\DxDevice.h"
+#include "TextureCpuAccess.h"
 
 #include <libhelpers\Containers\comptr_vector.h>
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Texture2D.h"
+#include "TextureUpdater.h"
 
 #include <libhelpers\H.h>
 
@@ -28,6 +29,13 @@ public:
 	}
 
 	virtual ~Yuv420pTexture() {
+	}
+
+	void Update(ID3D11DeviceContext *d3dCtx, const std::array<D3D11_SUBRESOURCE_DATA, 3> &data) {
+		for (size_t i = 0; i < this->GetPlaneCount(); i++) {
+			TextureUpdater<Usage>::Update(
+				d3dCtx, this->GetTexture(i), TextureUpdaterData(data[i]));
+		}
 	}
 
 private:
@@ -59,14 +67,14 @@ private:
 		texDesc.SampleDesc.Quality = 0;
 		texDesc.Usage = Usage;
 		texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		texDesc.CPUAccessFlags = 0;
+		texDesc.CPUAccessFlags = TextureCpuAccess<Usage>::Get();
 		texDesc.MiscFlags = 0;
 
 		srvDesc.Format = texDesc.Format;
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
 		srvDesc.Texture2D.MostDetailedMip = 0;
-
+		
 		for (uint32_t i = 0; i < ARRAY_SIZE(SizeDiv); i++) {
 			const D3D11_SUBRESOURCE_DATA *subResData = nullptr;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
