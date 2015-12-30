@@ -8,7 +8,18 @@
 class Window {
 public:
 	Window();
-	~Window();
+	virtual ~Window();
+
+	DirectX::XMUINT2 GetSize() const;
+
+	void Show();
+
+	void ProcessMessages();
+protected:
+	HWND GetHwnd() const;
+	const std::wstring &GetWndClassName() const;
+
+	virtual void ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) = 0;
 
 private:
 	HWND handle;

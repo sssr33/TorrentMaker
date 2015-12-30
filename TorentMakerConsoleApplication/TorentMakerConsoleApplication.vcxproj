@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
@@ -126,7 +126,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
@@ -148,7 +148,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
@@ -170,7 +170,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
@@ -182,6 +182,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="DxHelpres\DxDevice.h" />
     <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
+    <ClInclude Include="DxHelpres\State\OMRenderTargetState.h" />
+    <ClInclude Include="DxHelpres\State\RenderTargetState.h" />
+    <ClInclude Include="DxHelpres\State\RSViewportState.h" />
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
     <ClInclude Include="Geometry\QuadStripFltIdx.h" />
@@ -194,7 +197,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="ResourceFactory\InputAssembler.h" />
     <ClInclude Include="ResourceFactory\SamplerFactory.h" />
     <ClInclude Include="ResourceFactory\ShaderFactory.h" />
+    <ClInclude Include="Shaders\ColorPS.h" />
     <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
+    <ClInclude Include="Shaders\ShaderCBuffer.h" />
     <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -205,6 +210,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Texture\TextureUpdater.h" />
     <ClInclude Include="Texture\Yuv420pTexture.h" />
     <ClInclude Include="SequentialVideoFrameReader.h" />
+    <ClInclude Include="Window\DxWindow.h" />
+    <ClInclude Include="Window\SimpleDxWindow.h" />
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -223,7 +230,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
+    <ClCompile Include="Shaders\ColorPS.cpp" />
     <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
+    <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
     <ClCompile Include="Shaders\Yuv420pToRgbaPS.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
@@ -231,6 +240,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="Texture\Texture2D.cpp" />
     <ClCompile Include="TorentMakerConsoleApplication.cpp" />
     <ClCompile Include="SequentialVideoFrameReader.cpp" />
+    <ClCompile Include="Window\DxWindow.cpp" />
+    <ClCompile Include="Window\SimpleDxWindow.cpp" />
     <ClCompile Include="Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +250,12 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

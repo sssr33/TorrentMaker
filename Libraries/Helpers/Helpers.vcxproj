@@ -140,6 +140,7 @@
     <ClInclude Include="libhelpers\cond_add_reference.h" />
     <ClInclude Include="libhelpers\config.h" />
     <ClInclude Include="libhelpers\Containers\ChunkedDataBuffer.h" />
+    <ClInclude Include="libhelpers\Containers\comptr_array.h" />
     <ClInclude Include="libhelpers\Containers\comptr_vector.h" />
     <ClInclude Include="libhelpers\Containers\ConcurrentQueue.h" />
     <ClInclude Include="libhelpers\CoUniquePtr.h" />

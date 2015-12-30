@@ -50,6 +50,7 @@
     <ClInclude Include="libhelpers\vector_queue.h" />
     <ClInclude Include="libhelpers\unique_ptr_extensions.h" />
     <ClInclude Include="libhelpers\ScopedValue.h" />
+    <ClInclude Include="libhelpers\Containers\comptr_array.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libhelpers\PixelConverter\PixelConverter.cpp" />

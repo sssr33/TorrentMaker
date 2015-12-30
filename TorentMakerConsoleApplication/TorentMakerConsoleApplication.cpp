@@ -12,7 +12,7 @@
 #include "Texture\Bgra8RenderTarget.h"
 #include "Helpers\FFmpegHelpers.h"
 #include "Helpers\FileIterator.h"
-#include "Window\Window.h"
+#include "Window\SimpleDxWindow.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -88,6 +88,32 @@ int main() {
 	// TODO remove while when code will be stable
 	while (true) {
 		FileIterator fileIt(path);
+		DxDevice dxDev;
+		DxResources dxRes;
+		auto d3dDev = dxDev.GetD3DDevice();
+		auto d3dCtx = dxDev.GetD3DContext();
+		SimpleDxWindow window(dxDev);
+
+		auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
+
+		auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
+		auto vsCBuffer = vs->CreateCBuffer(d3dDev);
+
+		auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
+
+		auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
+		auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
+
+		window.Show();
+
+		while (true)
+		{
+			window.ProcessMessages();
+			window.Clear(d3dCtx, DirectX::Colors::CornflowerBlue);
+			auto state = window.SetToContext(d3dCtx);
+
+			window.Present();
+		}
 
 		while (fileIt.Next()) {
 			auto filePath = fileIt.GetCurrent();
@@ -108,11 +134,6 @@ int main() {
 
 				videoReader.IncrementProgress(timeStep);
 				
-				DxDevice dxDev;
-				DxResources dxRes;
-				auto d3dDev = dxDev.GetD3DDevice();
-				auto d3dCtx = dxDev.GetD3DContext();
-
 				const auto frameSize = videoReader.GetFrameSize();
 				Yuv420pTexture<D3D11_USAGE_DYNAMIC> yuvTex(
 					d3dDev,
@@ -125,16 +146,6 @@ int main() {
 				Bgra8CopyTexture bgraTexCopy(
 					d3dDev,
 					frameSize);
-
-				auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
-
-				auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
-				auto vsCBuffer = vs->CreateCBuffer(d3dDev);
-
-				auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
-
-				auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
-				auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
 
 				DirectX::XMMATRIX transform = DirectX::XMMatrixIdentity();
 

@@ -40,8 +40,6 @@ Window::Window()
 	}
 
 	Window::AddThisMap(this->handle, this);
-
-	ShowWindow(this->handle, SW_SHOWDEFAULT);
 }
 
 Window::~Window() {
@@ -49,17 +47,50 @@ Window::~Window() {
 	Window::RemoveThisMap(this->handle);
 }
 
+DirectX::XMUINT2 Window::GetSize() const {
+	RECT rect;
+	DirectX::XMUINT2 size;
+
+	if (GetClientRect(this->handle, &rect)) {
+		size.x = rect.right - rect.left;
+		size.y = rect.bottom - rect.top;
+	}
+	else {
+		size.x = size.y = 1;
+	}
+
+	return size;
+}
+
+void Window::Show() {
+	ShowWindow(this->handle, SW_SHOWDEFAULT);
+}
+
+void Window::ProcessMessages() {
+	MSG msg;
+
+	while (PeekMessageW(&msg, this->handle, 0, 0, PM_REMOVE)) {
+		DispatchMessageW(&msg);
+	}
+}
+
+HWND Window::GetHwnd() const {
+	return this->handle;
+}
+
+const std::wstring &Window::GetWndClassName() const {
+	return this->className;
+}
+
 LRESULT Window::WndProc(uint32_t msg, WPARAM wparam, LPARAM lparam) {
+	this->ProcessMsg(msg, wparam, lparam);
+
 	switch (msg) {
 	case WM_DESTROY:
 		// no PostQuitMessage(0) since want to continue run the app
 		// and looks like that there is no mem. leak
 		// TODO make more tests for mem leak on wnd destroy.
 		return 0L;
-	case WM_LBUTTONDOWN:
-		//std::cout << "\nmouse left button down at (" << LOWORD(lp)
-		//	<< ',' << HIWORD(lp) << ")\n";
-		// fall thru
 	default:
 		return DefWindowProc(this->handle, msg, wparam, lparam);
 	}

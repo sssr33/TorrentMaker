@@ -4,6 +4,7 @@
 #include <d2d1.h>
 #include <d2d1_1.h>
 #include <dwrite.h>
+#include <dxgi.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #include <wrl.h>
