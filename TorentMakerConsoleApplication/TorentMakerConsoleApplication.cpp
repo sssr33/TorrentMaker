@@ -100,17 +100,38 @@ int main() {
 		auto vsCBuffer = vs->CreateCBuffer(d3dDev);
 
 		auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
+		auto colorPs = dxRes.Shaders.PS.GetColorPS(d3dDev);
+		auto colorPsCBuffer = colorPs->CreateCBuffer(d3dDev);
+
+		colorPsCBuffer.Update(d3dCtx, DirectX::Colors::Red);
 
 		auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
 		auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
 
 		window.Show();
 
+		float angle = 0.0f;
+
 		while (true)
 		{
 			window.ProcessMessages();
 			window.Clear(d3dCtx, DirectX::Colors::CornflowerBlue);
 			auto state = window.SetToContext(d3dCtx);
+			auto rtSize = window.GetOutputSize();
+			float ar = (float)rtSize.x / (float)rtSize.y;
+
+			auto world = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationZ(angle), DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f));
+			auto projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), ar, 0.01f, 10.0f);
+			auto mvp = DirectX::XMMatrixMultiplyTranspose(world, projection);
+
+			angle += 0.1f;
+
+			vsCBuffer.Update(d3dCtx, mvp);
+
+			InputAssembler::Set(d3dCtx, *geometry, *vs, vsCBuffer);
+			colorPs->SetToContext(d3dCtx, colorPsCBuffer);
+
+			d3dCtx->Draw(geometry->GetVertexCount(), 0);
 
 			window.Present();
 		}

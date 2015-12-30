@@ -22,3 +22,11 @@ const std::shared_ptr<Yuv420pToRgbaPS> &ShaderFactory::PS::GetYuv420pToRgbaPS(ID
 
 	return this->yuv420pToRgbaPS;
 }
+
+const std::shared_ptr<ColorPS> &ShaderFactory::PS::GetColorPS(ID3D11Device *dev) {
+	if (!this->colorPS) {
+		this->colorPS = std::make_shared<ColorPS>(dev);
+	}
+
+	return this->colorPS;
+}

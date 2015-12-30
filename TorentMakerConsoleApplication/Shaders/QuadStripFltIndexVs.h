@@ -19,6 +19,6 @@ public:
 	static QuadStripFltIndexVsCBuffer CreateCBuffer(ID3D11Device *d3dDev);
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vs;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> shader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 };
