@@ -179,7 +179,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DxHelpres\D3dStructWrappers.h" />
+    <ClInclude Include="DxHelpres\Dx.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
+    <ClInclude Include="DxHelpres\DxDeviceCtx.h" />
     <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
     <ClInclude Include="DxHelpres\State\OMRenderTargetState.h" />
@@ -216,7 +218,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
+    <ClCompile Include="DxHelpres\Dx.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
+    <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />

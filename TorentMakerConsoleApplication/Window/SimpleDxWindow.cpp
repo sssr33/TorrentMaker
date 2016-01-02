@@ -33,7 +33,7 @@ SimpleDxWindow::RenderScope &SimpleDxWindow::RenderScope::operator=(RenderScope 
 SimpleDxWindow::SimpleDxWindow(DxDevice &dxDev)
 	: DxWindow(dxDev)
 {
-	this->Show();
+	//this->Show();
 }
 
 SimpleDxWindow::~SimpleDxWindow() {
@@ -43,6 +43,7 @@ void SimpleDxWindow::SetOnSizeChanged(std::function<void(const DirectX::XMUINT2 
 	this->onSizeChanged = v;
 
 	if (this->onSizeChanged) {
+		// call event handler to update dependent resources thus making it valid.
 		this->onSizeChanged(this->GetOutputSize());
 	}
 }

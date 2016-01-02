@@ -24,6 +24,9 @@
 #include <libhelpers\unique_ptr_extensions.h>
 #include <libhelpers\ScopedValue.h>
 
+#include <libhelpers\Thread\PPL\critical_section_guard_shared.h>
+#include <libhelpers\Thread\PPL\critical_section_guard_unique.h>
+
 extern "C" {
 #include <libavformat\avformat.h>
 }
@@ -88,11 +91,13 @@ int main() {
 	// TODO remove while when code will be stable
 	while (true) {
 		FileIterator fileIt(path);
+		//DxGuarded dx;
+
 		DxDevice dxDev;
 		DxResources dxRes;
 		auto d3dDev = dxDev.GetD3DDevice();
-		auto d3dCtx = dxDev.GetD3DContext();
-		SimpleDxWindow window(dxDev);
+		//auto d3dCtx = dxDev.GetD3DContext();
+		//SimpleDxWindow window(dxDev);
 
 		auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
 
@@ -103,7 +108,10 @@ int main() {
 		auto colorPs = dxRes.Shaders.PS.GetColorPS(d3dDev);
 		auto colorPsCBuffer = colorPs->CreateCBuffer(d3dDev);
 
-		colorPsCBuffer.Update(d3dCtx, DirectX::Colors::Red);
+		{
+			auto ctx = dxDev.GetContext();
+			colorPsCBuffer.Update(ctx->D3D(), DirectX::Colors::Red);
+		}
 
 		auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
 		auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
@@ -111,13 +119,13 @@ int main() {
 		float angle = 0.0f;
 		DirectX::XMMATRIX projection;
 		
-		window.SetOnSizeChanged([&](const DirectX::XMUINT2 &newSize) {
+		/*window.SetOnSizeChanged([&](const DirectX::XMUINT2 &newSize) {
 			float ar = (float)newSize.x / (float)newSize.y;
 			projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), ar, 0.01f, 10.0f);
-		});
+		});*/
 
-		while (true)
-		{
+		//while (true)
+		/*{
 			auto renderScope = window.Begin(d3dCtx, DirectX::Colors::CornflowerBlue);
 			auto world = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(sinf(angle)), DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f));
 			auto mvp = DirectX::XMMatrixMultiplyTranspose(world, projection);
@@ -130,7 +138,7 @@ int main() {
 			colorPs->SetToContext(d3dCtx, colorPsCBuffer);
 
 			d3dCtx->Draw(geometry->GetVertexCount(), 0);
-		}
+		}*/
 
 		while (fileIt.Next()) {
 			auto filePath = fileIt.GetCurrent();
@@ -176,21 +184,22 @@ int main() {
 				for (; videoReader.GetProgress() < endTime; videoReader.IncrementProgress(timeStep)) {
 					// TODO add logic when frame is empty
 					auto frame = videoReader.GetFrame();
+					auto ctx = dxDev.GetContext();
 
-					yuvTex.Update(d3dCtx, FFmpegHelpers::GetData<3>(frame));
-					vsCBuffer.Update(d3dCtx, transform);
+					yuvTex.Update(ctx->D3D(), FFmpegHelpers::GetData<3>(frame));
+					vsCBuffer.Update(ctx->D3D(), transform);
 
-					bgraTex.Clear(d3dCtx, DirectX::Colors::White);
-					bgraTex.SetRenderTarget(d3dCtx);
-					bgraTex.SetViewport(d3dCtx);
+					bgraTex.Clear(ctx->D3D(), DirectX::Colors::White);
+					bgraTex.SetRenderTarget(ctx->D3D());
+					bgraTex.SetViewport(ctx->D3D());
 
-					InputAssembler::Set(d3dCtx, *geometry, *vs, vsCBuffer);
-					ps->SetToContext(d3dCtx, yuvTex, pointSampler);
+					InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
+					ps->SetToContext(ctx->D3D(), yuvTex, pointSampler);
 
-					d3dCtx->Draw(geometry->GetVertexCount(), 0);
+					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
 
-					bgraTexCopy.Copy(d3dCtx, &bgraTex);
-					auto bgraTexCopyData = bgraTexCopy.Map(d3dCtx);
+					bgraTexCopy.Copy(ctx->D3D(), &bgraTex);
+					auto bgraTexCopyData = bgraTexCopy.Map(ctx->D3D());
 					ImageUtils imgUtils;
 
 					auto savePath = H::System::GetPackagePath() + L"screen0.png";

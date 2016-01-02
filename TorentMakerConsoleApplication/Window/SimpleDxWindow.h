@@ -31,5 +31,6 @@ protected:
 	virtual void CreateSizeDependentResources(const DirectX::XMUINT2 &newSize) override;
 
 private:
+
 	std::function<void(const DirectX::XMUINT2 &newSize)> onSizeChanged;
 };

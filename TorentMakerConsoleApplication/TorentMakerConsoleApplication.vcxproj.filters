@@ -36,6 +36,8 @@
     <ClInclude Include="Window\SimpleDxWindow.h" />
     <ClInclude Include="Shaders\ColorPS.h" />
     <ClInclude Include="Shaders\ShaderCBuffer.h" />
+    <ClInclude Include="DxHelpres\Dx.h" />
+    <ClInclude Include="DxHelpres\DxDeviceCtx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -66,6 +68,8 @@
     <ClCompile Include="Window\SimpleDxWindow.cpp" />
     <ClCompile Include="Shaders\ColorPS.cpp" />
     <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
+    <ClCompile Include="DxHelpres\Dx.cpp" />
+    <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
