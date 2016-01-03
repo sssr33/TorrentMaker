@@ -1,49 +1,27 @@
 #include "Window.h"
 
 Window::Window()
-	: handle(NULL) 
+	: handle(NULL)
 {
-	WNDCLASSW wndclass;
-	auto hinst = GetModuleHandleW(NULL);
-	this->className = L"Window" + std::to_wstring(Window::nextWndId++);
+	WindowInitData initData;
+	auto initFuture = initData.InitPromise.get_future();
 
-	wndclass.style = CS_DBLCLKS;
-	wndclass.lpfnWndProc = Window::WndProcTmp;
-	wndclass.cbClsExtra = 0;
-	wndclass.cbWndExtra = 0;
-	wndclass.hInstance = hinst;
-	wndclass.hIcon = NULL;
-	wndclass.hCursor = NULL;
-	wndclass.hbrBackground = HBRUSH(COLOR_WINDOW + 1);
-	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = this->className.data();
+	this->wndThread = std::thread(Window::WndThreadMainTmp, this, &initData);
 
-	if (!RegisterClassW(&wndclass)) {
-		H::System::ThrowIfFailed(E_FAIL);
-	}
-	
-	this->handle = CreateWindowW(
-		this->className.data(),
-		L"WindowTitle",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		NULL,
-		NULL,
-		hinst,
-		NULL);
-
-	if (!this->handle) {
-		H::System::ThrowIfFailed(E_FAIL);
-	}
-
-	Window::AddThisMap(this->handle, this);
+	initFuture.get();
 }
 
 Window::~Window() {
-	DestroyWindow(this->handle);
+	// DestroyWindow won't work from another thread.
+	// PostMessage works.
+	// WindowMessages::Shutdown used to call DestroyWindow from window thread
+	// DestroyWindow must(!) be called to clean window resources
+	PostMessageW(this->handle, WM_USER, (uint32_t)WindowMessages::Shutdown, 0);
+
+	if (this->wndThread.joinable()) {
+		this->wndThread.join();
+	}
+
 	Window::RemoveThisMap(this->handle);
 }
 
@@ -63,7 +41,8 @@ DirectX::XMUINT2 Window::GetSize() const {
 }
 
 void Window::Show() {
-	ShowWindow(this->handle, SW_SHOWDEFAULT);
+	auto tmp = ShowWindow(this->handle, SW_SHOWDEFAULT);
+	int top = 234;
 }
 
 void Window::ProcessMessages() {
@@ -82,18 +61,104 @@ const std::wstring &Window::GetWndClassName() const {
 	return this->className;
 }
 
+void Window::ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) {
+
+}
+
+void Window::WndThreadMain(WindowInitData *initData) {
+	bool initFailed = false;
+	try {
+		WNDCLASSW wndclass;
+		auto hinst = GetModuleHandleW(NULL);
+		this->className = L"Window" + std::to_wstring(Window::nextWndId++);
+
+		wndclass.style = CS_DBLCLKS;
+		wndclass.lpfnWndProc = Window::WndProcTmp;
+		wndclass.cbClsExtra = 0;
+		wndclass.cbWndExtra = 0;
+		wndclass.hInstance = hinst;
+		wndclass.hIcon = NULL;
+		wndclass.hCursor = NULL;
+		wndclass.hbrBackground = HBRUSH(COLOR_WINDOW + 1);
+		wndclass.lpszMenuName = NULL;
+		wndclass.lpszClassName = this->className.data();
+
+		if (!RegisterClassW(&wndclass)) {
+			H::System::ThrowIfFailed(E_FAIL);
+		}
+
+		this->handle = CreateWindowW(
+			this->className.data(),
+			L"WindowTitle",
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			NULL,
+			NULL,
+			hinst,
+			NULL);
+
+		if (!this->handle) {
+			H::System::ThrowIfFailed(E_FAIL);
+		}
+
+		this->Show();
+
+		// small hack
+		// call AddThisMap after Show to use DefWindowProc from Window::WndProcTmp while base class initializing
+		// TODO try to find better aproach without making more compicated code since current logic fits all needs
+		Window::AddThisMap(this->handle, this);
+
+		initData->InitPromise.set_value(true);
+	}
+	catch (...) {
+		initData->InitPromise.set_exception(std::current_exception());
+		initFailed = true;
+	}
+	initData = nullptr; // Must not be used after InitPromise.set_value/set_exception
+
+	if (!initFailed) {
+		MSG msg;
+		BOOL ret;
+
+		while ((ret = GetMessageW(&msg, this->handle, 0, 0)) != 0) {
+			if (ret == -1) {
+				// handle the error and possibly exit
+				break;
+			}
+			else {
+				TranslateMessage(&msg);
+				DispatchMessageW(&msg);
+			}
+		}
+	}
+}
+
 LRESULT Window::WndProc(uint32_t msg, WPARAM wparam, LPARAM lparam) {
 	this->ProcessMsg(msg, wparam, lparam);
 
 	switch (msg) {
+	case WM_USER: {
+		auto msg = (WindowMessages)wparam;
+		switch (msg) {
+		case WindowMessages::Shutdown:
+			DestroyWindow(this->handle);
+			break;
+		default:
+			break;
+		}
+		break;
+	}
 	case WM_DESTROY:
-		// no PostQuitMessage(0) since want to continue run the app
-		// and looks like that there is no mem. leak
-		// TODO make more tests for mem leak on wnd destroy.
-		return 0L;
+		PostQuitMessage(0);
+		break;
 	default:
 		return DefWindowProc(this->handle, msg, wparam, lparam);
 	}
+
+	return 0L;
 }
 
 
@@ -103,11 +168,15 @@ std::atomic_uint64_t Window::nextWndId(0);
 thread::critical_section Window::thisMapCs;
 std::map<HWND, Window *> Window::thisMap;
 
+void Window::WndThreadMainTmp(Window *wnd, WindowInitData *initData) {
+	wnd->WndThreadMain(initData);
+}
+
 LRESULT CALLBACK Window::WndProcTmp(HWND h, UINT msg, WPARAM wparam, LPARAM lparam) {
 	auto _this = Window::GetThisMap(h);
 
 	if (!_this) {
-		// This cas happen while window is initializing
+		// This can happen while window is initializing
 		return DefWindowProc(h, msg, wparam, lparam);
 	}
 

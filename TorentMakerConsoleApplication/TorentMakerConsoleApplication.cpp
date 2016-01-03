@@ -114,7 +114,14 @@ int main() {
 
 		float angle = 0.0f;
 		DirectX::XMMATRIX projection;
+
+		Window wnd;
 		
+		while (true)
+		{
+			Sleep(1000);
+		}
+
 		/*window.SetOnSizeChanged([&](const DirectX::XMUINT2 &newSize) {
 			float ar = (float)newSize.x / (float)newSize.y;
 			projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), ar, 0.01f, 10.0f);
