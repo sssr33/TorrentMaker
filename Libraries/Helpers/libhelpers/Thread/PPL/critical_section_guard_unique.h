@@ -14,7 +14,7 @@ template<class T, class MultithreadWrapper>
 class critical_section_guard_unique_accessor;
 
 template<class T, class MultithreadWrapper>
-class critical_section_guard_unique_accessor_ptr {
+struct critical_section_guard_unique_accessor_ptr {
 	typedef critical_section_guard_ptr<T, MultithreadWrapper, critical_section_guard_unique_accessor> Type;
 };
 

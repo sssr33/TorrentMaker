@@ -1,6 +1,6 @@
 #pragma once
-#include "DxDevice.h"
-#include "..\ResourceFactory\DxResources.h" // BAD!!!
+#include "DxHelpers.h"
+#include "..\ResourceFactory\DxResources.h"
 
 #include <libhelpers\Thread\PPL\critical_section_guard_unique.h>
 

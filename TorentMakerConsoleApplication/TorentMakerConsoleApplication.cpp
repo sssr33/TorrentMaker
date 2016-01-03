@@ -5,7 +5,7 @@
 #include "FileDialogEventsImpl.h"
 #include "FFmpegIoCtx.h"
 #include "SequentialVideoFrameReader.h"
-#include "DxHelpres\DxHelpers.h"
+#include "DxHelpres\Dx.h"
 #include "ResourceFactory\DxResources.h"
 #include "Texture\Yuv420pTexture.h"
 #include "Texture\Bgra8CopyTexture.h"
@@ -91,30 +91,26 @@ int main() {
 	// TODO remove while when code will be stable
 	while (true) {
 		FileIterator fileIt(path);
-		//DxGuarded dx;
-
-		DxDevice dxDev;
-		DxResources dxRes;
-		auto d3dDev = dxDev.GetD3DDevice();
-		//auto d3dCtx = dxDev.GetD3DContext();
+		Dx dx;
+		auto d3dDev = dx.dev.GetD3DDevice();
 		//SimpleDxWindow window(dxDev);
 
-		auto geometry = dxRes.Geometry.GetQuadStripIdx(d3dDev);
+		auto geometry = dx.res.Geometry.GetQuadStripIdx(d3dDev);
 
-		auto vs = dxRes.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
+		auto vs = dx.res.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
 		auto vsCBuffer = vs->CreateCBuffer(d3dDev);
 
-		auto ps = dxRes.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
-		auto colorPs = dxRes.Shaders.PS.GetColorPS(d3dDev);
+		auto ps = dx.res.Shaders.PS.GetYuv420pToRgbaPS(d3dDev);
+		auto colorPs = dx.res.Shaders.PS.GetColorPS(d3dDev);
 		auto colorPsCBuffer = colorPs->CreateCBuffer(d3dDev);
 
 		{
-			auto ctx = dxDev.GetContext();
+			auto ctx = dx.dev.GetContext();
 			colorPsCBuffer.Update(ctx->D3D(), DirectX::Colors::Red);
 		}
 
-		auto pointSampler = dxRes.Samplers.GetPointSampler(d3dDev);
-		auto linearSampler = dxRes.Samplers.GetLinearSampler(d3dDev);
+		auto pointSampler = dx.res.Samplers.GetPointSampler(d3dDev);
+		auto linearSampler = dx.res.Samplers.GetLinearSampler(d3dDev);
 
 		float angle = 0.0f;
 		DirectX::XMMATRIX projection;
@@ -184,7 +180,7 @@ int main() {
 				for (; videoReader.GetProgress() < endTime; videoReader.IncrementProgress(timeStep)) {
 					// TODO add logic when frame is empty
 					auto frame = videoReader.GetFrame();
-					auto ctx = dxDev.GetContext();
+					auto ctx = dx.dev.GetContext();
 
 					yuvTex.Update(ctx->D3D(), FFmpegHelpers::GetData<3>(frame));
 					vsCBuffer.Update(ctx->D3D(), transform);

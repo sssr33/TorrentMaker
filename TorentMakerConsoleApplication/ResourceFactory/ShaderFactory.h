@@ -5,6 +5,7 @@
 #include "..\Shaders\ColorPS.h"
 
 #include <memory>
+#include <libhelpers\Thread\critical_section.h>
 
 class ShaderFactory {
 public:
@@ -13,6 +14,8 @@ public:
 		const std::shared_ptr<QuadStripFltIndexVs> &GetQuadStripFltIndexVs(ID3D11Device *dev);
 
 	private:
+		thread::critical_section cs;
+
 		std::shared_ptr<QuadStripFltIndexVs> quadStripFltIndexVs;
 	} VS;
 
@@ -22,6 +25,8 @@ public:
 		const std::shared_ptr<ColorPS> &GetColorPS(ID3D11Device *dev);
 
 	private:
+		thread::critical_section cs;
+
 		std::shared_ptr<Yuv420pToRgbaPS> yuv420pToRgbaPS;
 		std::shared_ptr<ColorPS> colorPS;
 	} PS;
