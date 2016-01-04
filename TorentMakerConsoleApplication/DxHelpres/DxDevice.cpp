@@ -16,7 +16,7 @@ IDWriteFactory *DxDevice::GetDwriteFactory() const {
 	return this->dwriteFactory.Get();
 }
 
-ID2D1Factory1 *DxDevice::GetD2D1Factory() const {
+ID2D1Factory1 *DxDevice::GetD2DFactory() const {
 	return this->d2dFactory.Get();
 }
 

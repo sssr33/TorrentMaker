@@ -6,7 +6,9 @@ Window::Window()
 	WindowInitData initData;
 	auto initFuture = initData.InitPromise.get_future();
 
-	this->wndThread = std::thread(Window::WndThreadMainTmp, this, &initData);
+	this->wndThread = std::thread([this, &initData]() {
+		this->WndThreadMain(&initData);
+	});
 
 	initFuture.get();
 }
@@ -167,10 +169,6 @@ LRESULT Window::WndProc(uint32_t msg, WPARAM wparam, LPARAM lparam) {
 std::atomic_uint64_t Window::nextWndId(0);
 thread::critical_section Window::thisMapCs;
 std::map<HWND, Window *> Window::thisMap;
-
-void Window::WndThreadMainTmp(Window *wnd, WindowInitData *initData) {
-	wnd->WndThreadMain(initData);
-}
 
 LRESULT CALLBACK Window::WndProcTmp(HWND h, UINT msg, WPARAM wparam, LPARAM lparam) {
 	auto _this = Window::GetThisMap(h);

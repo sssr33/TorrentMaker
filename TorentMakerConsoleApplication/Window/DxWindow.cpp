@@ -1,13 +1,23 @@
 #include "DxWindow.h"
 
-DxWindow::DxWindow(DxDevice &dxDev)
-	:dxDev(dxDev), swapChainSize(0, 0)
+DxWindow::DxWindow(Dx *dx)
+	:dx(dx), swapChainSize(0, 0), work(true), angle(0.0f), texSize(1, 1)
 {
 	auto size = this->GetSize();
 	this->ResizeSwapChain(size);
+	this->CreateSizeDependentResources(this->swapChainSize);
+
+	this->renderThread = std::thread([=]() {
+		this->RenderMain();
+	});
 }
 
 DxWindow::~DxWindow() {
+	this->work = false;
+
+	if (this->renderThread.joinable()) {
+		this->renderThread.join();
+	}
 }
 
 DirectX::XMUINT2 DxWindow::GetOutputSize() const {
@@ -41,6 +51,19 @@ void DxWindow::Present() {
 	H::System::ThrowIfFailed(hr);
 }
 
+void DxWindow::SetTexture(const std::shared_ptr<Bgra8RenderTarget> &v) {
+	thread::critical_section::scoped_lock lk(this->texCs);
+	this->texture = v;
+	this->texSize = this->texture->GetSize();
+}
+
+void DxWindow::CreateSizeDependentResources(const DirectX::XMUINT2 &newSize) {
+	float ar = (float)newSize.x / (float)newSize.y;
+	auto projectionTmp = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), ar, 0.01f, 10.0f);
+
+	DirectX::XMStoreFloat4x4(&this->projection, projectionTmp);
+}
+
 void DxWindow::ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) {
 	switch (msg) {
 	case WM_SIZE: {
@@ -49,13 +72,86 @@ void DxWindow::ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) {
 		size.x = LOWORD(lparam);
 		size.y = HIWORD(lparam);
 
-		if (this->ResizeSwapChain(size)) {
-			this->CreateSizeDependentResources(this->swapChainSize);
+		{
+			thread::critical_section::scoped_lock lk(this->renderCs);
+			if (this->ResizeSwapChain(size)) {
+				this->CreateSizeDependentResources(this->swapChainSize);
+			}
 		}
+		
 		break;
 	}
 	default:
 		break;
+	}
+}
+
+void DxWindow::RenderMain() {
+	auto d3dDev = this->dx->dev.GetD3DDevice();
+	auto geometry = this->dx->res.Geometry.GetQuadStripIdx(d3dDev);
+
+	auto vs = this->dx->res.Shaders.VS.GetQuadStripFltIndexVs(d3dDev);
+	auto vsCBuffer = vs->CreateCBuffer(d3dDev);
+
+	auto ps = this->dx->res.Shaders.PS.GetTex1PS(d3dDev);
+	auto colorPs = this->dx->res.Shaders.PS.GetColorPS(d3dDev);
+	auto colorPsCBuffer = colorPs->CreateCBuffer(d3dDev);
+
+	{
+		auto ctx = this->dx->dev.GetContext();
+		colorPsCBuffer.Update(ctx->D3D(), DirectX::Colors::Red);
+	}
+
+	auto pointSampler = this->dx->res.Samplers.GetPointSampler(d3dDev);
+	auto linearSampler = this->dx->res.Samplers.GetLinearSampler(d3dDev);
+
+	while (this->work)
+	{
+		{
+			thread::critical_section::scoped_lock lk(this->renderCs);
+			auto ctx = this->dx->dev.GetContext();
+
+			this->Clear(ctx->D3D(), DirectX::Colors::CornflowerBlue);
+			auto state = this->SetToContext(ctx->D3D());
+
+			auto projection = DirectX::XMLoadFloat4x4(&this->projection);
+
+			DirectX::XMMATRIX world;
+
+			{
+				thread::critical_section::scoped_lock lk(this->texCs);
+				float texAr = (float)this->texSize.x / (float)this->texSize.y;
+				world = DirectX::XMMatrixScaling(texAr, 1.0f, 1.0f);
+			}
+
+			world = DirectX::XMMatrixMultiply(world, DirectX::XMMatrixRotationY(sinf(angle)));
+			world = DirectX::XMMatrixMultiply(world, DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f));
+
+			auto mvp = DirectX::XMMatrixMultiplyTranspose(world, projection);
+
+			//angle += 0.1f;
+
+			vsCBuffer.Update(ctx->D3D(), mvp);
+
+			InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
+
+			{
+				thread::critical_section::scoped_lock lk(this->texCs);
+
+				if (this->texture) {
+					ps->SetToContext(ctx->D3D(), *this->texture, linearSampler);
+				}
+				else {
+					colorPs->SetToContext(ctx->D3D(), colorPsCBuffer);
+				}
+			}
+
+			ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+		}
+		
+		// no lock here for perfromance
+		// looks like it's thread-safe
+		this->Present();
 	}
 }
 
@@ -64,7 +160,7 @@ bool DxWindow::ResizeSwapChain(const DirectX::XMUINT2 &size) {
 	HRESULT hr = S_OK;
 	bool sizeChanged = false;
 	DirectX::XMUINT2 sizeTmp;
-	auto d3dDev = this->dxDev.GetD3DDevice();
+	auto d3dDev = this->dx->dev.GetD3DDevice();
 
 	sizeTmp.x = (std::max)(size.x, 1U);
 	sizeTmp.y = (std::max)(size.y, 1U);
@@ -76,6 +172,11 @@ bool DxWindow::ResizeSwapChain(const DirectX::XMUINT2 &size) {
 
 		this->rtv = nullptr;
 		this->swapChainSize = sizeTmp;
+
+		{
+			auto ctx = this->dx->dev.GetContext();
+			ctx->D3D()->Flush();
+		}
 
 		if (!this->swapChain) {
 			DXGI_SWAP_CHAIN_DESC swapChainDesc;

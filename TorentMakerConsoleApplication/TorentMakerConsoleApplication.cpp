@@ -107,6 +107,38 @@ int main() {
 		{
 			auto ctx = dx.dev.GetContext();
 			colorPsCBuffer.Update(ctx->D3D(), DirectX::Colors::Red);
+
+			//auto testFn = [&]() {
+			//	auto d2 = ctx->D2D();
+
+			//	Sleep(10);
+
+			//	HRESULT hr = S_OK;
+			//	Microsoft::WRL::ComPtr<ID2D1Bitmap> bmp;
+			//	auto bmpSize = D2D1::SizeU(1024, 1024);
+			//	auto bmpProp = D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_R8G8B8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+			//	d2->BeginDraw();
+			//	Sleep(10);
+			//	hr = d2->EndDraw();
+
+			//	/*d2->SetTransform(D2D1::IdentityMatrix());
+
+			//	hr = d2->CreateBitmap(bmpSize, bmpProp, bmp.GetAddressOf());
+			//	*/
+
+			//	if (FAILED(hr)) {
+			//		int stop = 234;
+			//	}
+			//};
+
+			//std::thread a([&]() { while (true) testFn(); });
+			//std::thread b([&]() { while (true) testFn(); });
+
+			//while (true)
+			//{
+
+			//}
 		}
 
 		auto pointSampler = dx.res.Samplers.GetPointSampler(d3dDev);
@@ -115,33 +147,7 @@ int main() {
 		float angle = 0.0f;
 		DirectX::XMMATRIX projection;
 
-		Window wnd;
-		
-		while (true)
-		{
-			Sleep(1000);
-		}
-
-		/*window.SetOnSizeChanged([&](const DirectX::XMUINT2 &newSize) {
-			float ar = (float)newSize.x / (float)newSize.y;
-			projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), ar, 0.01f, 10.0f);
-		});*/
-
-		//while (true)
-		/*{
-			auto renderScope = window.Begin(d3dCtx, DirectX::Colors::CornflowerBlue);
-			auto world = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(sinf(angle)), DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f));
-			auto mvp = DirectX::XMMatrixMultiplyTranspose(world, projection);
-
-			angle += 0.1f;
-
-			vsCBuffer.Update(d3dCtx, mvp);
-
-			InputAssembler::Set(d3dCtx, *geometry, *vs, vsCBuffer);
-			colorPs->SetToContext(d3dCtx, colorPsCBuffer);
-
-			d3dCtx->Draw(geometry->GetVertexCount(), 0);
-		}*/
+		DxWindow wnd(&dx);
 
 		while (fileIt.Next()) {
 			auto filePath = fileIt.GetCurrent();
@@ -161,16 +167,20 @@ int main() {
 				uint64_t endTime = videoReader.GetProgressDelta() - timeStep;
 
 				videoReader.IncrementProgress(timeStep);
-				
+
 				const auto frameSize = videoReader.GetFrameSize();
 				Yuv420pTexture<D3D11_USAGE_DYNAMIC> yuvTex(
 					d3dDev,
 					frameSize);
 
-				Bgra8RenderTarget bgraTex(
-					d3dDev,
+				auto bgraTex = std::make_shared<Bgra8RenderTarget>(d3dDev,
 					frameSize,
 					0);
+
+				/*Bgra8RenderTarget bgraTex(
+					d3dDev,
+					frameSize,
+					0);*/
 				Bgra8CopyTexture bgraTexCopy(
 					d3dDev,
 					frameSize);
@@ -185,39 +195,51 @@ int main() {
 				//int photo = 0;
 
 				for (; videoReader.GetProgress() < endTime; videoReader.IncrementProgress(timeStep)) {
-					// TODO add logic when frame is empty
-					auto frame = videoReader.GetFrame();
-					auto ctx = dx.dev.GetContext();
+					{
+						// TODO add logic when frame is empty
+						auto frame = videoReader.GetFrame();
+						auto ctx = dx.dev.GetContext();
 
-					yuvTex.Update(ctx->D3D(), FFmpegHelpers::GetData<3>(frame));
-					vsCBuffer.Update(ctx->D3D(), transform);
+						yuvTex.Update(ctx->D3D(), FFmpegHelpers::GetData<3>(frame));
+						vsCBuffer.Update(ctx->D3D(), transform);
 
-					bgraTex.Clear(ctx->D3D(), DirectX::Colors::White);
-					bgraTex.SetRenderTarget(ctx->D3D());
-					bgraTex.SetViewport(ctx->D3D());
+						RenderTargetState<1> rtState(ctx->D3D());
+						bgraTex->Clear(ctx->D3D(), DirectX::Colors::White);
+						bgraTex->SetRenderTarget(ctx->D3D());
+						bgraTex->SetViewport(ctx->D3D());
 
-					InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
-					ps->SetToContext(ctx->D3D(), yuvTex, pointSampler);
+						InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
+						ps->SetToContext(ctx->D3D(), yuvTex, pointSampler);
 
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+						ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
 
-					bgraTexCopy.Copy(ctx->D3D(), &bgraTex);
-					auto bgraTexCopyData = bgraTexCopy.Map(ctx->D3D());
-					ImageUtils imgUtils;
+						bgraTex->GenerateMips(ctx->D3D());
 
-					auto savePath = H::System::GetPackagePath() + L"screen0.png";
-					auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
-					auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
+						wnd.SetTexture(bgraTex);
 
-					imgUtils.EncodeAllocPixels(encodeFrame.Get(), frameSize, GUID_WICPixelFormat32bppBGRA);
-					imgUtils.EncodePixels(
-						encodeFrame.Get(), frameSize.y, 
-						bgraTexCopyData.GetRowPitch(), 
-						bgraTexCopyData.GetRowPitch() * frameSize.y * 4, 
-						bgraTexCopyData.GetData());
+						bgraTexCopy.Copy(ctx->D3D(), bgraTex.get());
+						auto bgraTexCopyData = bgraTexCopy.Map(ctx->D3D());
+						ImageUtils imgUtils;
 
-					imgUtils.EncodeCommit(encodeFrame.Get());
-					imgUtils.EncodeCommit(encoder.Get());
+						auto savePath = H::System::GetPackagePath() + L"screen0.png";
+						auto encoder = imgUtils.CreateEncoder(savePath, GUID_ContainerFormatPng);
+						auto encodeFrame = imgUtils.CreateFrameForEncode(encoder.Get());
+
+						imgUtils.EncodeAllocPixels(encodeFrame.Get(), frameSize, GUID_WICPixelFormat32bppBGRA);
+						imgUtils.EncodePixels(
+							encodeFrame.Get(), frameSize.y,
+							bgraTexCopyData.GetRowPitch(),
+							bgraTexCopyData.GetRowPitch() * frameSize.y * 4,
+							bgraTexCopyData.GetData());
+
+						imgUtils.EncodeCommit(encodeFrame.Get());
+						imgUtils.EncodeCommit(encoder.Get());
+					}
+
+					/*while (true)
+					{
+
+					}*/
 				}
 
 				auto videoInfo = videoReader.End();

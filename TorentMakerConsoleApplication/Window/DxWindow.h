@@ -1,10 +1,13 @@
 #pragma once
 #include "Window.h"
-#include "..\DxHelpres\DxHelpers.h"
+#include "..\DxHelpres\Dx.h"
+#include "..\Texture\Bgra8RenderTarget.h"
+
+#include <memory>
 
 class DxWindow : public Window {
 public:
-	DxWindow(DxDevice &dxDev);
+	DxWindow(Dx *dx);
 	virtual ~DxWindow();
 
 	DirectX::XMUINT2 GetOutputSize() const;
@@ -14,17 +17,31 @@ public:
 
 	void Present();
 
-protected:
-	DxDevice &dxDev;
+	void SetTexture(const std::shared_ptr<Bgra8RenderTarget> &v);
 
-	virtual void CreateSizeDependentResources(const DirectX::XMUINT2 &newSize) = 0;
+protected:
+	Dx *dx;
+
+	virtual void CreateSizeDependentResources(const DirectX::XMUINT2 &newSize);
 
 private:
+	std::thread renderThread;
+	thread::critical_section renderCs;
+	bool work;
+
 	DirectX::XMUINT2 swapChainSize;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
 
+	float angle;
+	DirectX::XMFLOAT4X4 projection;
+
+	thread::critical_section texCs;
+	DirectX::XMUINT2 texSize;
+	std::shared_ptr<Bgra8RenderTarget> texture;
+
 	virtual void ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) override;
 
+	void RenderMain();
 	bool ResizeSwapChain(const DirectX::XMUINT2 &size);
 };

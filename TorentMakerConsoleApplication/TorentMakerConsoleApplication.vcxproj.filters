@@ -38,6 +38,7 @@
     <ClInclude Include="Shaders\ShaderCBuffer.h" />
     <ClInclude Include="DxHelpres\Dx.h" />
     <ClInclude Include="DxHelpres\DxDeviceCtx.h" />
+    <ClInclude Include="Shaders\Tex1PS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -70,10 +71,12 @@
     <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
     <ClCompile Include="DxHelpres\Dx.cpp" />
     <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
+    <ClCompile Include="Shaders\Tex1PS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl" />
     <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\Tex1PS.hlsl" />
   </ItemGroup>
 </Project>

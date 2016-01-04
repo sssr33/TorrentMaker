@@ -46,7 +46,6 @@ private:
 	static thread::critical_section thisMapCs;
 	static std::map<HWND, Window *> thisMap;
 
-	static void WndThreadMainTmp(Window *wnd, WindowInitData *initData);
 	static LRESULT CALLBACK WndProcTmp(HWND h, UINT msg, WPARAM wparam, LPARAM lparam);
 	static void AddThisMap(HWND h, Window *_this);
 	static Window *GetThisMap(HWND h);

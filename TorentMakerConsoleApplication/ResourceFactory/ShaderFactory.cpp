@@ -36,3 +36,13 @@ const std::shared_ptr<ColorPS> &ShaderFactory::PS::GetColorPS(ID3D11Device *dev)
 
 	return this->colorPS;
 }
+
+const std::shared_ptr<Tex1PS> &ShaderFactory::PS::GetTex1PS(ID3D11Device *dev) {
+	thread::critical_section::scoped_lock lk(this->cs);
+
+	if (!this->tex1PS) {
+		this->tex1PS = std::make_shared<Tex1PS>(dev);
+	}
+
+	return this->tex1PS;
+}

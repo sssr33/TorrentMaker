@@ -19,7 +19,7 @@ public:
 
 	// multithreaded
 	IDWriteFactory *GetDwriteFactory() const;
-	ID2D1Factory1 *GetD2D1Factory() const;
+	ID2D1Factory1 *GetD2DFactory() const;
 	ID3D11Device *GetD3DDevice() const;
 	ID2D1Device *GetD2DDevice() const;
 
