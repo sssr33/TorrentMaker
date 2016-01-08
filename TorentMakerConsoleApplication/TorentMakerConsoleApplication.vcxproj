@@ -178,10 +178,12 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DxHelpres\D2DCtxMt.h" />
     <ClInclude Include="DxHelpres\D3dStructWrappers.h" />
     <ClInclude Include="DxHelpres\Dx.h" />
     <ClInclude Include="DxHelpres\DxDevice.h" />
     <ClInclude Include="DxHelpres\DxDeviceCtx.h" />
+    <ClInclude Include="DxHelpres\DxDeviceMt.h" />
     <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
     <ClInclude Include="DxHelpres\State\OMRenderTargetState.h" />
@@ -208,6 +210,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture\Bgra8CopyTexture.h" />
     <ClInclude Include="Texture\Bgra8RenderTarget.h" />
+    <ClInclude Include="Texture\Bgra8RenderTargetWithD2D.h" />
     <ClInclude Include="Texture\Texture2D.h" />
     <ClInclude Include="Texture\TextureCpuAccess.h" />
     <ClInclude Include="Texture\TextureUpdater.h" />
@@ -218,10 +221,12 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DxHelpres\D2DCtxMt.cpp" />
     <ClCompile Include="DxHelpres\D3dStructWrappers.cpp" />
     <ClCompile Include="DxHelpres\Dx.cpp" />
     <ClCompile Include="DxHelpres\DxDevice.cpp" />
     <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
+    <ClCompile Include="DxHelpres\DxDeviceMt.cpp" />
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
@@ -243,6 +248,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture\Bgra8CopyTexture.cpp" />
     <ClCompile Include="Texture\Bgra8RenderTarget.cpp" />
+    <ClCompile Include="Texture\Bgra8RenderTargetWithD2D.cpp" />
     <ClCompile Include="Texture\Texture2D.cpp" />
     <ClCompile Include="TorentMakerConsoleApplication.cpp" />
     <ClCompile Include="SequentialVideoFrameReader.cpp" />

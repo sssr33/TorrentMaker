@@ -17,7 +17,7 @@ public:
 
 	void Present();
 
-	void SetTexture(const std::shared_ptr<Bgra8RenderTarget> &v);
+	void SetTexture(const std::shared_ptr<Texture2DResource> &v);
 
 protected:
 	Dx *dx;
@@ -38,7 +38,7 @@ private:
 
 	thread::critical_section texCs;
 	DirectX::XMUINT2 texSize;
-	std::shared_ptr<Bgra8RenderTarget> texture;
+	std::shared_ptr<Texture2DResource> texture;
 
 	virtual void ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam) override;
 

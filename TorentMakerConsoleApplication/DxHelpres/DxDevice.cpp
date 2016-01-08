@@ -12,22 +12,6 @@ DxDevice::DxDevice()
 DxDevice::~DxDevice() {
 }
 
-IDWriteFactory *DxDevice::GetDwriteFactory() const {
-	return this->dwriteFactory.Get();
-}
-
-ID2D1Factory1 *DxDevice::GetD2DFactory() const {
-	return this->d2dFactory.Get();
-}
-
-ID3D11Device *DxDevice::GetD3DDevice() const {
-	return this->d3dDev.Get();
-}
-
-ID2D1Device *DxDevice::GetD2DDevice() const {
-	return this->d2dDevice.Get();
-}
-
 critical_section_guard<DxDeviceCtx>::Accessor DxDevice::GetContext() {
 	return this->ctx.Get();
 }
@@ -85,6 +69,8 @@ void DxDevice::CreateDeviceDependentResources() {
 	this->EnableD3DDeviceMultithreading();
 	this->CreateD2DDevice();
 	d2dCtx = this->CreateD2DDeviceContext();
+
+	this->d2dCtxMt = D2DCtxMt(d2dCtx);
 
 	auto ctxAcc = this->ctx.Get();
 	*ctxAcc = DxDeviceCtx(d3dCtx, d2dCtx);

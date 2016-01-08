@@ -2,9 +2,11 @@
 
 #include <libhelpers\H.h>
 
-Bgra8RenderTarget::Bgra8RenderTarget(ID3D11Device *d3dDev, const DirectX::XMUINT2 &size, uint32_t mips)
+Bgra8RenderTarget::Bgra8RenderTarget(DxDeviceMt *dxDevMt, const DirectX::XMUINT2 &size, uint32_t mips)
 {
 	HRESULT hr = S_OK;
+	auto d3dDev = dxDevMt->GetD3DDevice();
+	auto d2dCtxMt = dxDevMt->GetD2DCtxMt();
 	D3D11_TEXTURE2D_DESC texDesc;
 	/*D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;*/

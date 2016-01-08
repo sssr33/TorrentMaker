@@ -8,7 +8,7 @@ public:
 
 	void SetToContext(
 		ID3D11DeviceContext *d3dCtx,
-		const Bgra8RenderTarget &tex,
+		const Texture2DResource &tex,
 		const Microsoft::WRL::ComPtr<ID3D11SamplerState> &sampler) const;
 
 private:

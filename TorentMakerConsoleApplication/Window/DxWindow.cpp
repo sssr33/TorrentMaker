@@ -51,7 +51,7 @@ void DxWindow::Present() {
 	H::System::ThrowIfFailed(hr);
 }
 
-void DxWindow::SetTexture(const std::shared_ptr<Bgra8RenderTarget> &v) {
+void DxWindow::SetTexture(const std::shared_ptr<Texture2DResource> &v) {
 	thread::critical_section::scoped_lock lk(this->texCs);
 	this->texture = v;
 	this->texSize = this->texture->GetSize();

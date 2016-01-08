@@ -12,7 +12,7 @@ Tex1PS::Tex1PS(ID3D11Device *d3dDev) {
 
 void Tex1PS::SetToContext(
 	ID3D11DeviceContext *d3dCtx,
-	const Bgra8RenderTarget &tex,
+	const Texture2DResource &tex,
 	const Microsoft::WRL::ComPtr<ID3D11SamplerState> &sampler) const
 {
 	d3dCtx->PSSetShader(this->shader.Get(), nullptr, 0);

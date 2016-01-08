@@ -112,3 +112,46 @@ void Texture2DRenderTarget::AddPlane(
 	Texture2DResource::AddPlane(tex, srv);
 	this->rtv.push_back(rtv);
 }
+
+
+
+
+Texture2DRenderTargetWithD2D::~Texture2DRenderTargetWithD2D() {
+}
+
+ID2D1Bitmap1 *Texture2DRenderTargetWithD2D::GetD2DBitmap(uint32_t plane) const {
+	return this->d2dBitmap[plane];
+}
+
+ID2D1BitmapBrush1 *Texture2DRenderTargetWithD2D::GetD2DBitmapBrush(uint32_t plane) const {
+	return this->d2dBitmapBrush[plane];
+}
+
+void Texture2DRenderTargetWithD2D::SetD2DRenderTarget(ID2D1DeviceContext *d2dCtx, uint32_t plane, float dpiX, float dpiY) const {
+	d2dCtx->SetTarget(this->d2dBitmap[plane]);
+	d2dCtx->SetDpi(dpiX, dpiY);
+}
+
+void Texture2DRenderTargetWithD2D::AddPlane(
+	ID3D11Texture2D *tex,
+	ID3D11ShaderResourceView *srv,
+	ID3D11RenderTargetView *rtv,
+	ID2D1Bitmap1 *d2dBmp,
+	ID2D1BitmapBrush1 *d2dBmpBrush)
+{
+	Texture2DRenderTarget::AddPlane(tex, srv, rtv);
+	this->d2dBitmap.push_back(d2dBmp);
+	this->d2dBitmapBrush.push_back(d2dBmpBrush);
+}
+
+void Texture2DRenderTargetWithD2D::AddPlane(
+	const Microsoft::WRL::ComPtr<ID3D11Texture2D> &tex,
+	const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> &srv,
+	const Microsoft::WRL::ComPtr<ID3D11RenderTargetView> &rtv,
+	const Microsoft::WRL::ComPtr<ID2D1Bitmap1> &d2dBmp,
+	const Microsoft::WRL::ComPtr<ID2D1BitmapBrush1> &d2dBmpBrush)
+{
+	Texture2DRenderTarget::AddPlane(tex, srv, rtv);
+	this->d2dBitmap.push_back(d2dBmp);
+	this->d2dBitmapBrush.push_back(d2dBmpBrush);
+}
