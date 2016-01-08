@@ -29,6 +29,19 @@
     <ClInclude Include="Texture\TextureUpdater.h" />
     <ClInclude Include="Texture\TextureCpuAccess.h" />
     <ClInclude Include="Window\Window.h" />
+    <ClInclude Include="Window\DxWindow.h" />
+    <ClInclude Include="DxHelpres\State\OMRenderTargetState.h" />
+    <ClInclude Include="DxHelpres\State\RSViewportState.h" />
+    <ClInclude Include="DxHelpres\State\RenderTargetState.h" />
+    <ClInclude Include="Window\SimpleDxWindow.h" />
+    <ClInclude Include="Shaders\ColorPS.h" />
+    <ClInclude Include="Shaders\ShaderCBuffer.h" />
+    <ClInclude Include="DxHelpres\Dx.h" />
+    <ClInclude Include="DxHelpres\DxDeviceCtx.h" />
+    <ClInclude Include="Shaders\Tex1PS.h" />
+    <ClInclude Include="DxHelpres\D2DCtxMt.h" />
+    <ClInclude Include="DxHelpres\DxDeviceMt.h" />
+    <ClInclude Include="Texture\Bgra8RenderTargetWithD2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -55,9 +68,21 @@
     <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
     <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
     <ClCompile Include="Window\Window.cpp" />
+    <ClCompile Include="Window\DxWindow.cpp" />
+    <ClCompile Include="Window\SimpleDxWindow.cpp" />
+    <ClCompile Include="Shaders\ColorPS.cpp" />
+    <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
+    <ClCompile Include="DxHelpres\Dx.cpp" />
+    <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
+    <ClCompile Include="Shaders\Tex1PS.cpp" />
+    <ClCompile Include="DxHelpres\D2DCtxMt.cpp" />
+    <ClCompile Include="DxHelpres\DxDeviceMt.cpp" />
+    <ClCompile Include="Texture\Bgra8RenderTargetWithD2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\Tex1PS.hlsl" />
   </ItemGroup>
 </Project>

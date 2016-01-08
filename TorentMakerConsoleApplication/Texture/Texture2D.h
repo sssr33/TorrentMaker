@@ -64,3 +64,33 @@ protected:
 private:
 	comptr_vector<ID3D11RenderTargetView> rtv;
 };
+
+
+
+
+class Texture2DRenderTargetWithD2D : public Texture2DRenderTarget {
+public:
+	virtual ~Texture2DRenderTargetWithD2D();
+
+	ID2D1Bitmap1 *GetD2DBitmap(uint32_t plane = 0) const;
+	ID2D1BitmapBrush1 *GetD2DBitmapBrush(uint32_t plane = 0) const;
+
+	void SetD2DRenderTarget(ID2D1DeviceContext *d2dCtx, uint32_t plane = 0, float dpiX = 96.0f, float dpiY = 96.0f) const;
+
+protected:
+	void AddPlane(
+		ID3D11Texture2D *tex, 
+		ID3D11ShaderResourceView *srv, 
+		ID3D11RenderTargetView *rtv,
+		ID2D1Bitmap1 *d2dBmp,
+		ID2D1BitmapBrush1 *d2dBmpBrush);
+	void AddPlane(
+		const Microsoft::WRL::ComPtr<ID3D11Texture2D> &tex,
+		const Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> &srv,
+		const Microsoft::WRL::ComPtr<ID3D11RenderTargetView> &rtv,
+		const Microsoft::WRL::ComPtr<ID2D1Bitmap1> &d2dBmp,
+		const Microsoft::WRL::ComPtr<ID2D1BitmapBrush1> &d2dBmpBrush);
+private:
+	comptr_vector<ID2D1Bitmap1> d2dBitmap;
+	comptr_vector<ID2D1BitmapBrush1> d2dBitmapBrush;
+};

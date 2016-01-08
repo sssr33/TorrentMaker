@@ -130,6 +130,32 @@ public:
 		return inscribed;
 	}
 
+	static DirectX::XMFLOAT2 InscribeRectAR(const DirectX::XMFLOAT2 &srcRect, const DirectX::XMFLOAT2 &dstRect) {
+		const float NormHeight = 1.0f;
+		float normSrcWidth, normDstWidth;
+		DirectX::XMFLOAT2 inscribed;
+
+		normSrcWidth = srcRect.x / srcRect.y;
+		normDstWidth = dstRect.x / dstRect.y;
+
+		if (normSrcWidth > normDstWidth) {
+			// src is wider than dst
+			// need to scale down to dst
+			float scale = normDstWidth / normSrcWidth;
+
+			// mul by dstRect.y to find rect inside dst
+			inscribed.x = scale * normSrcWidth * dstRect.y;
+			inscribed.y = scale * NormHeight * dstRect.y;
+		}
+		else {
+			// mul by dstRect.y to find rect inside dst
+			inscribed.x = normSrcWidth * dstRect.y;
+			inscribed.y = NormHeight * dstRect.y;
+		}
+
+		return inscribed;
+	}
+
 	/*
 	DirectXMath have bug in BoundingOrientedBox::Transform method:
 	http://xboxforums.create.msdn.com/forums/p/113061/680807.aspx
@@ -261,6 +287,56 @@ public:
 	{
 		float _viewZ = ViewZ * NearZ;
 		return DirectX::XMMatrixPerspectiveLH(ViewWidth * _viewZ, ViewHeight * _viewZ, NearZ, FarZ);
+	}
+
+	static D2D1::Matrix3x2F ProjectionD2D(
+		float viewportWidth,
+		float viewportHeight,
+		float viewWidth,
+		float viewHeight,
+		D2D1::Matrix3x2F *inverted = nullptr)
+	{
+		const float NearZ = 0.1f;
+		const float FarZ = 10.0f;
+		auto proj3D = DirectX::XMMatrixOrthographicLH(viewWidth, viewHeight, NearZ, FarZ);
+
+		return HMath::ProjectionD2D(viewportWidth, viewportHeight, proj3D, inverted);
+	}
+
+	static D2D1::Matrix3x2F ProjectionD2D(
+		float viewportWidth,
+		float viewportHeight,
+		DirectX::CXMMATRIX proj3D,
+		D2D1::Matrix3x2F *inverted = nullptr)
+	{
+		D2D1::Matrix3x2F d2dMatrix;
+		float halfViewportWidth = viewportWidth * 0.5f;
+		float halfViewportHeight = viewportHeight * 0.5f;
+		auto scale = DirectX::XMMatrixScaling(halfViewportWidth, -halfViewportHeight, 1.0f);
+		auto offset = DirectX::XMMatrixTranslation(halfViewportWidth, halfViewportHeight, 0.0f);
+
+		auto finalTransform = DirectX::XMMatrixMultiply(proj3D, scale);
+		finalTransform = DirectX::XMMatrixMultiply(finalTransform, offset);
+
+		d2dMatrix._11 = finalTransform.r[0].XF;
+		d2dMatrix._12 = finalTransform.r[0].YF;
+		d2dMatrix._21 = finalTransform.r[1].XF;
+		d2dMatrix._22 = finalTransform.r[1].YF;
+		d2dMatrix._31 = finalTransform.r[3].XF;
+		d2dMatrix._32 = finalTransform.r[3].YF;
+
+		if (inverted) {
+			auto tmpInverted = DirectX::XMMatrixInverse(nullptr, finalTransform);
+
+			inverted->_11 = tmpInverted.r[0].XF;
+			inverted->_12 = tmpInverted.r[0].YF;
+			inverted->_21 = tmpInverted.r[1].XF;
+			inverted->_22 = tmpInverted.r[1].YF;
+			inverted->_31 = tmpInverted.r[3].XF;
+			inverted->_32 = tmpInverted.r[3].YF;
+		}
+
+		return d2dMatrix;
 	}
 
 	// round up for power of two multiples

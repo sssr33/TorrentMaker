@@ -12,11 +12,11 @@ public:
 		const Yuv420pTexture<usage> &tex,
 		const Microsoft::WRL::ComPtr<ID3D11SamplerState> &sampler) const
 	{
-		d3dCtx->PSSetShader(this->ps.Get(), nullptr, 0);
+		d3dCtx->PSSetShader(this->shader.Get(), nullptr, 0);
 		d3dCtx->PSSetSamplers(0, 1, sampler.GetAddressOf());
 		tex.SetToContextPS(d3dCtx, 0);
 	}
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> ps;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> shader;
 };

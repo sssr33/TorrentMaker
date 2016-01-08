@@ -2,18 +2,41 @@
 
 #include <map>
 #include <atomic>
+#include <thread>
 #include <libhelpers\H.h>
 #include <libhelpers\Thread\critical_section.h>
+#include <future>
+
+struct WindowInitData {
+	std::promise<bool> InitPromise;
+};
+
+enum class WindowMessages : uint32_t {
+	Shutdown // used to call DestroyWindow from window thread
+};
 
 class Window {
 public:
 	Window();
-	~Window();
+	virtual ~Window();
+
+	DirectX::XMUINT2 GetSize() const;
+
+	void Show();
+
+	void ProcessMessages();
+protected:
+	HWND GetHwnd() const;
+	const std::wstring &GetWndClassName() const;
+
+	virtual void ProcessMsg(uint32_t msg, WPARAM wparam, LPARAM lparam);
 
 private:
 	HWND handle;
 	std::wstring className;
+	std::thread wndThread;
 
+	void WndThreadMain(WindowInitData *initData);
 	LRESULT WndProc(uint32_t msg, WPARAM wparam, LPARAM lparam);
 
 	static std::atomic_uint64_t nextWndId;

@@ -2,8 +2,8 @@
 
 #include <libhelpers\H.h>
 
-DxDevice::DxDevice() 
-: featureLevel(D3D_FEATURE_LEVEL_9_1)
+DxDevice::DxDevice()
+	: featureLevel(D3D_FEATURE_LEVEL_9_1)
 {
 	this->CreateDeviceIndependentResources();
 	this->CreateDeviceDependentResources();
@@ -12,36 +12,16 @@ DxDevice::DxDevice()
 DxDevice::~DxDevice() {
 }
 
-IDWriteFactory *DxDevice::GetDwriteFactory() const {
-	return this->dwriteFactory.Get();
-}
-
-ID2D1Factory1 *DxDevice::GetD2D1Factory() const {
-	return this->d2dFactory.Get();
-}
-
-ID3D11Device *DxDevice::GetD3DDevice() const {
-	return this->d3dDev.Get();
-}
-
-ID3D11DeviceContext *DxDevice::GetD3DContext() const {
-	return this->d3dCtx.Get();
-}
-
-ID2D1Device *DxDevice::GetD2DDevice() const {
-	return this->d2dDevice.Get();
-}
-
-ID2D1DeviceContext *DxDevice::GetD2DCtx() const {
-	return this->d2dCtx.Get();
+critical_section_guard<DxDeviceCtx>::Accessor DxDevice::GetContext() {
+	return this->ctx.Get();
 }
 
 void DxDevice::CreateDeviceIndependentResources() {
 	HRESULT hr = S_OK;
 
 	hr = DWriteCreateFactory(
-		DWRITE_FACTORY_TYPE_SHARED, 
-		__uuidof(IDWriteFactory), 
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(IDWriteFactory),
 		(IUnknown **)this->dwriteFactory.GetAddressOf());
 	H::System::ThrowIfFailed(hr);
 
@@ -52,6 +32,8 @@ void DxDevice::CreateDeviceIndependentResources() {
 void DxDevice::CreateDeviceDependentResources() {
 	HRESULT hr = S_OK;
 	uint32_t flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dCtx;
+	Microsoft::WRL::ComPtr<ID2D1DeviceContext> d2dCtx;
 
 #ifdef _DEBUG
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -67,12 +49,12 @@ void DxDevice::CreateDeviceDependentResources() {
 		D3D_FEATURE_LEVEL_9_1
 	};
 
-	hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 
-		nullptr, flags, 
-		featureLevels, ARRAY_SIZE(featureLevels), 
-		D3D11_SDK_VERSION, 
-		this->d3dDev.GetAddressOf(), &this->featureLevel, 
-		this->d3dCtx.GetAddressOf());
+	hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE,
+		nullptr, flags,
+		featureLevels, ARRAY_SIZE(featureLevels),
+		D3D11_SDK_VERSION,
+		this->d3dDev.GetAddressOf(), &this->featureLevel,
+		d3dCtx.GetAddressOf());
 
 	if (FAILED(hr)) {
 		hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_WARP,
@@ -80,13 +62,18 @@ void DxDevice::CreateDeviceDependentResources() {
 			featureLevels, ARRAY_SIZE(featureLevels),
 			D3D11_SDK_VERSION,
 			this->d3dDev.GetAddressOf(), &this->featureLevel,
-			this->d3dCtx.GetAddressOf());
+			d3dCtx.GetAddressOf());
 		H::System::ThrowIfFailed(hr);
 	}
 
 	this->EnableD3DDeviceMultithreading();
 	this->CreateD2DDevice();
-	this->CreateD2DDeviceContext();
+	d2dCtx = this->CreateD2DDeviceContext();
+
+	this->d2dCtxMt = D2DCtxMt(d2dCtx);
+
+	auto ctxAcc = this->ctx.Get();
+	*ctxAcc = DxDeviceCtx(d3dCtx, d2dCtx);
 }
 
 void DxDevice::EnableD3DDeviceMultithreading() {
@@ -95,7 +82,7 @@ void DxDevice::EnableD3DDeviceMultithreading() {
 
 	hr = this->d3dDev.As(&multithread);
 	H::System::ThrowIfFailed(hr);
-	
+
 	multithread->SetMultithreadProtected(TRUE);
 }
 
@@ -128,11 +115,14 @@ void DxDevice::CreateD2DDevice() {
 	H::System::ThrowIfFailed(hr);*/
 }
 
-void DxDevice::CreateD2DDeviceContext() {
+Microsoft::WRL::ComPtr<ID2D1DeviceContext> DxDevice::CreateD2DDeviceContext() {
 	HRESULT hr = S_OK;
-	
+	Microsoft::WRL::ComPtr<ID2D1DeviceContext> d2dCtx;
+
 	hr = this->d2dDevice->CreateDeviceContext(
-		D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS, 
-		this->d2dCtx.GetAddressOf());
+		D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
+		d2dCtx.GetAddressOf());
 	H::System::ThrowIfFailed(hr);
+
+	return d2dCtx;
 }

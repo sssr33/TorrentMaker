@@ -14,7 +14,6 @@
     <ClInclude Include="libhelpers\service\Operation.h" />
     <ClInclude Include="libhelpers\service\Service.h" />
     <ClInclude Include="libhelpers\Text\UriCodec.h" />
-    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard.h" />
     <ClInclude Include="libhelpers\Thread\PPL\critical_section_lock.h" />
     <ClInclude Include="libhelpers\Thread\PPL\safe_task.h" />
     <ClInclude Include="libhelpers\Thread\condition_variable.h" />
@@ -50,6 +49,13 @@
     <ClInclude Include="libhelpers\vector_queue.h" />
     <ClInclude Include="libhelpers\unique_ptr_extensions.h" />
     <ClInclude Include="libhelpers\ScopedValue.h" />
+    <ClInclude Include="libhelpers\Containers\comptr_array.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_shared.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_container.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_ptr.h" />
+    <ClInclude Include="libhelpers\Metainfo\Marker.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_unique.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="libhelpers\PixelConverter\PixelConverter.cpp" />

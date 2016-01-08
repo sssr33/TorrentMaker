@@ -140,6 +140,7 @@
     <ClInclude Include="libhelpers\cond_add_reference.h" />
     <ClInclude Include="libhelpers\config.h" />
     <ClInclude Include="libhelpers\Containers\ChunkedDataBuffer.h" />
+    <ClInclude Include="libhelpers\Containers\comptr_array.h" />
     <ClInclude Include="libhelpers\Containers\comptr_vector.h" />
     <ClInclude Include="libhelpers\Containers\ConcurrentQueue.h" />
     <ClInclude Include="libhelpers\CoUniquePtr.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="libhelpers\ImageUtils.h" />
     <ClInclude Include="libhelpers\ImageUtilsEncodeOptions.h" />
     <ClInclude Include="libhelpers\Macros.h" />
+    <ClInclude Include="libhelpers\Metainfo\Marker.h" />
     <ClInclude Include="libhelpers\Metainfo\PointerGetter.h" />
     <ClInclude Include="libhelpers\Metainfo\RawType.h" />
     <ClInclude Include="libhelpers\Metainfo\Signature.h" />
@@ -172,6 +174,10 @@
     <ClInclude Include="libhelpers\Thread\condition_variable.h" />
     <ClInclude Include="libhelpers\Thread\critical_section.h" />
     <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_unique.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_container.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_ptr.h" />
+    <ClInclude Include="libhelpers\Thread\PPL\critical_section_guard_shared.h" />
     <ClInclude Include="libhelpers\Thread\PPL\critical_section_lock.h" />
     <ClInclude Include="libhelpers\Thread\PPL\safe_task.h" />
     <ClInclude Include="libhelpers\Thread\ThreadPool.h" />
