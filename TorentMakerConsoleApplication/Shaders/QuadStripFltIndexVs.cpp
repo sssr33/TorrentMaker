@@ -13,7 +13,7 @@ void QuadStripFltIndexVsCBuffer::Update(ID3D11DeviceContext *d3dCtx, DirectX::CX
 
 QuadStripFltIndexVs::QuadStripFltIndexVs(ID3D11Device *d3dDev) {
 	HRESULT hr = S_OK;
-	auto data = H::System::LoadPackageFile(L"QuadStripFromFltIndexVs.cso");
+	auto data = H::System::LoadPackageFile(L"QuadStripFltIndexVs.cso");
 
 	hr = d3dDev->CreateVertexShader(data.data(), data.size(), nullptr, this->shader.GetAddressOf());
 	H::System::ThrowIfFailed(hr);
