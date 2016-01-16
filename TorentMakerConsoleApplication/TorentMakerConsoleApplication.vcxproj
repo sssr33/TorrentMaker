@@ -111,8 +111,8 @@
       <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
-xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /y /d
+xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /y /d</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -129,8 +129,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
-xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /y /d
+xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /y /d</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -151,8 +151,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
-xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /y /d
+xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /y /d</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,8 +173,8 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <AdditionalDependencies>Shlwapi.lib;D3D11.lib;d2d1.lib;Dwrite.lib;dxgi.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /Y
-xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /Y</Command>
+      <Command>xcopy "$(SolutionDir)Libraries\prebuilt\bin\$(Configuration)\$(Platform)\*.dll" "$(OutDir)" /y /d
+xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /y /d</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
