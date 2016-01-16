@@ -42,6 +42,10 @@
     <ClInclude Include="DxHelpres\D2DCtxMt.h" />
     <ClInclude Include="DxHelpres\DxDeviceMt.h" />
     <ClInclude Include="Texture\Bgra8RenderTargetWithD2D.h" />
+    <ClInclude Include="Shaders\Gradient2DPS.h" />
+    <ClInclude Include="ResourceFactory\BlendStateFactory.h" />
+    <ClInclude Include="ResourceFactory\BlendState.h" />
+    <ClInclude Include="DxHelpres\State\OMBlendState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -78,11 +82,16 @@
     <ClCompile Include="DxHelpres\D2DCtxMt.cpp" />
     <ClCompile Include="DxHelpres\DxDeviceMt.cpp" />
     <ClCompile Include="Texture\Bgra8RenderTargetWithD2D.cpp" />
+    <ClCompile Include="Shaders\Gradient2DPS.cpp" />
+    <ClCompile Include="ResourceFactory\BlendStateFactory.cpp" />
+    <ClCompile Include="ResourceFactory\BlendState.cpp" />
+    <ClCompile Include="DxHelpres\State\OMBlendState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\QuadStripFltIndexVs.hlsl" />
     <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\Tex1PS.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\Gradient2DPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -186,6 +186,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="DxHelpres\DxDeviceMt.h" />
     <ClInclude Include="DxHelpres\DxHelpers.h" />
     <ClInclude Include="DxHelpres\MappedResource.h" />
+    <ClInclude Include="DxHelpres\State\OMBlendState.h" />
     <ClInclude Include="DxHelpres\State\OMRenderTargetState.h" />
     <ClInclude Include="DxHelpres\State\RenderTargetState.h" />
     <ClInclude Include="DxHelpres\State\RSViewportState.h" />
@@ -196,12 +197,15 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="Helpers\FFmpegHelpers.h" />
     <ClInclude Include="Helpers\FileIterator.h" />
     <ClInclude Include="Helpers\MiscHelpers.h" />
+    <ClInclude Include="ResourceFactory\BlendState.h" />
+    <ClInclude Include="ResourceFactory\BlendStateFactory.h" />
     <ClInclude Include="ResourceFactory\DxResources.h" />
     <ClInclude Include="ResourceFactory\GeometryFactory.h" />
     <ClInclude Include="ResourceFactory\InputAssembler.h" />
     <ClInclude Include="ResourceFactory\SamplerFactory.h" />
     <ClInclude Include="ResourceFactory\ShaderFactory.h" />
     <ClInclude Include="Shaders\ColorPS.h" />
+    <ClInclude Include="Shaders\Gradient2DPS.h" />
     <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
     <ClInclude Include="Shaders\ShaderCBuffer.h" />
     <ClInclude Include="Shaders\Tex1PS.h" />
@@ -228,6 +232,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="DxHelpres\DxDeviceCtx.cpp" />
     <ClCompile Include="DxHelpres\DxDeviceMt.cpp" />
     <ClCompile Include="DxHelpres\MappedResource.cpp" />
+    <ClCompile Include="DxHelpres\State\OMBlendState.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
     <ClCompile Include="Geometry\QuadStripFltIdx.cpp" />
@@ -235,12 +240,15 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="Helpers\FFmpegHelpers.cpp" />
     <ClCompile Include="Helpers\FileIterator.cpp" />
     <ClCompile Include="Helpers\MiscHelpers.cpp" />
+    <ClCompile Include="ResourceFactory\BlendState.cpp" />
+    <ClCompile Include="ResourceFactory\BlendStateFactory.cpp" />
     <ClCompile Include="ResourceFactory\DxResources.cpp" />
     <ClCompile Include="ResourceFactory\GeometryFactory.cpp" />
     <ClCompile Include="ResourceFactory\InputAssembler.cpp" />
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
     <ClCompile Include="Shaders\ColorPS.cpp" />
+    <ClCompile Include="Shaders\Gradient2DPS.cpp" />
     <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
     <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
     <ClCompile Include="Shaders\Tex1PS.cpp" />
@@ -263,6 +271,12 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Hlsl\Gradient2DPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

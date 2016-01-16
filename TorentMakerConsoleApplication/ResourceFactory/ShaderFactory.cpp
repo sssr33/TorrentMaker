@@ -46,3 +46,13 @@ const std::shared_ptr<Tex1PS> &ShaderFactory::PS::GetTex1PS(ID3D11Device *dev) {
 
 	return this->tex1PS;
 }
+
+const std::shared_ptr<Gradient2DPS> &ShaderFactory::PS::GetGradient2DPS(ID3D11Device *dev) {
+	thread::critical_section::scoped_lock lk(this->cs);
+
+	if (!this->gradient2dPS) {
+		this->gradient2dPS = std::make_shared<Gradient2DPS>(dev);
+	}
+
+	return this->gradient2dPS;
+}
