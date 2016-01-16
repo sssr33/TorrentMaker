@@ -1,7 +1,7 @@
 #include "DxWindow.h"
 
 DxWindow::DxWindow(Dx *dx)
-	:dx(dx), swapChainSize(0, 0), work(true), angle(0.0f), texSize(1, 1)
+	:dx(dx), swapChainSize(0, 0), work(true), texSize(1, 1)
 {
 	auto size = this->GetSize();
 	this->ResizeSwapChain(size);
@@ -119,17 +119,24 @@ void DxWindow::RenderMain() {
 			DirectX::XMMATRIX world;
 
 			{
+				DirectX::XMFLOAT2 screenRect, texRect;
+
+				screenRect.x = 2.0f * (float)this->swapChainSize.x / (float)this->swapChainSize.y;
+				screenRect.y = 2.0f;
+
 				thread::critical_section::scoped_lock lk(this->texCs);
-				float texAr = (float)this->texSize.x / (float)this->texSize.y;
-				world = DirectX::XMMatrixScaling(texAr, 1.0f, 1.0f);
+
+				texRect.x = (float)this->texSize.x / (float)this->texSize.y;
+				texRect.y = 1.0f;
+
+				texRect = H::Math::InscribeRectAR(texRect, screenRect);
+
+				world = DirectX::XMMatrixScaling(texRect.x, texRect.y, 1.0f);
 			}
 
-			world = DirectX::XMMatrixMultiply(world, DirectX::XMMatrixRotationY(sinf(angle)));
 			world = DirectX::XMMatrixMultiply(world, DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.0f));
 
 			auto mvp = DirectX::XMMatrixMultiplyTranspose(world, projection);
-
-			//angle += 0.1f;
 
 			vsCBuffer.Update(ctx->D3D(), mvp);
 

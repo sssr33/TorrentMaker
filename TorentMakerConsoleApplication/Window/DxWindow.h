@@ -33,7 +33,6 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
 
-	float angle;
 	DirectX::XMFLOAT4X4 projection;
 
 	thread::critical_section texCs;
