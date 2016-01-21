@@ -46,6 +46,7 @@
     <ClInclude Include="ResourceFactory\BlendStateFactory.h" />
     <ClInclude Include="ResourceFactory\BlendState.h" />
     <ClInclude Include="DxHelpres\State\OMBlendState.h" />
+    <ClInclude Include="Geometry\TexPosGeometry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -86,6 +87,7 @@
     <ClCompile Include="ResourceFactory\BlendStateFactory.cpp" />
     <ClCompile Include="ResourceFactory\BlendState.cpp" />
     <ClCompile Include="DxHelpres\State\OMBlendState.cpp" />
+    <ClCompile Include="Geometry\TexPosGeometry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />

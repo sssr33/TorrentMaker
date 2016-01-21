@@ -10,5 +10,8 @@ struct PsInput {
 
 float4 main(PsInput input) : SV_TARGET{
 	float4 colorTmp = color;
+
+	colorTmp.a *= input.tex.x;
+
 	return colorTmp;
 }

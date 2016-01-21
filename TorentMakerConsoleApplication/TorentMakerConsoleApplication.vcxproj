@@ -193,6 +193,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
     <ClInclude Include="Geometry\QuadStripFltIdx.h" />
+    <ClInclude Include="Geometry\TexPosGeometry.h" />
     <ClInclude Include="Helpers\Deleters.h" />
     <ClInclude Include="Helpers\FFmpegHelpers.h" />
     <ClInclude Include="Helpers\FileIterator.h" />
@@ -236,6 +237,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
     <ClCompile Include="Geometry\QuadStripFltIdx.cpp" />
+    <ClCompile Include="Geometry\TexPosGeometry.cpp" />
     <ClCompile Include="Helpers\Deleters.cpp" />
     <ClCompile Include="Helpers\FFmpegHelpers.cpp" />
     <ClCompile Include="Helpers\FileIterator.cpp" />

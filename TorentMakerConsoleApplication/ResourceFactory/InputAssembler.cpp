@@ -10,7 +10,7 @@ void InputAssembler::Set(
 
 	d3dCtx->IASetInputLayout(inputLayout.Get());
 	d3dCtx->IASetPrimitiveTopology(geom.GetTopology());
-
+	
 	geom.SetToContext(d3dCtx);
 	vs.SetToContext(d3dCtx, cbuffer);
 }

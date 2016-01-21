@@ -7,12 +7,12 @@ Texture2D::~Texture2D() {
 }
 
 ID3D11Texture2D *Texture2D::GetTexture(uint32_t plane) const {
-	return this->tex[plane];
+	return this->tex.get(plane);
 }
 
 DirectX::XMUINT2 Texture2D::GetSize(uint32_t plane) const {
 	D3D11_TEXTURE2D_DESC desc;
-	auto texTmp = this->tex[plane];
+	auto texTmp = this->tex.get(plane);
 
 	texTmp->GetDesc(&desc);
 
@@ -38,7 +38,7 @@ Texture2DResource::~Texture2DResource() {
 }
 
 ID3D11ShaderResourceView *Texture2DResource::GetShaderResourceView(uint32_t plane) const {
-	return this->srv[plane];
+	return this->srv.get(plane);
 }
 
 void Texture2DResource::SetToContextPS(ID3D11DeviceContext *d3dCtx, uint32_t startSlot) const {
@@ -65,7 +65,7 @@ Texture2DRenderTarget::~Texture2DRenderTarget() {
 }
 
 ID3D11RenderTargetView *Texture2DRenderTarget::GetRenderTargetView(uint32_t plane) const {
-	return this->rtv[plane];
+	return this->rtv.get(plane);
 }
 
 void Texture2DRenderTarget::Clear(ID3D11DeviceContext *d3dCtx, const float color[4]) const {
@@ -120,15 +120,15 @@ Texture2DRenderTargetWithD2D::~Texture2DRenderTargetWithD2D() {
 }
 
 ID2D1Bitmap1 *Texture2DRenderTargetWithD2D::GetD2DBitmap(uint32_t plane) const {
-	return this->d2dBitmap[plane];
+	return this->d2dBitmap.get(plane);
 }
 
 ID2D1BitmapBrush1 *Texture2DRenderTargetWithD2D::GetD2DBitmapBrush(uint32_t plane) const {
-	return this->d2dBitmapBrush[plane];
+	return this->d2dBitmapBrush.get(plane);
 }
 
 void Texture2DRenderTargetWithD2D::SetD2DRenderTarget(ID2D1DeviceContext *d2dCtx, uint32_t plane, float dpiX, float dpiY) const {
-	d2dCtx->SetTarget(this->d2dBitmap[plane]);
+	d2dCtx->SetTarget(this->d2dBitmap.get(plane));
 	d2dCtx->SetDpi(dpiX, dpiY);
 }
 

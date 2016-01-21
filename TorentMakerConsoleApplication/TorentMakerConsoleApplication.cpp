@@ -24,6 +24,7 @@
 #include <libhelpers\ImageUtils.h>
 #include <libhelpers\unique_ptr_extensions.h>
 #include <libhelpers\ScopedValue.h>
+#include <libhelpers\Containers\comptr_array.h>
 
 #include <libhelpers\Thread\PPL\critical_section_guard_shared.h>
 #include <libhelpers\Thread\PPL\critical_section_guard_unique.h>
@@ -276,9 +277,9 @@ int main() {
 					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
 
 
-					auto tmpColor = DirectX::Colors::DarkCyan;
+					auto tmpColor = DirectX::Colors::DarkBlue;
 
-					tmpColor.f[3] = 0.25f;
+					//tmpColor.f[3] = 0.25f;
 
 					gradient2DCb.Update(ctx->D3D(), tmpColor);
 					gradient2DPs->SetToContext(ctx->D3D(), gradient2DCb);

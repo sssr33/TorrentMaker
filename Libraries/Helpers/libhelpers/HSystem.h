@@ -13,6 +13,7 @@
 #ifdef HAVE_VISUAL_STUDIO
 #include <intrin.h>
 #include <windows.h>
+#include <wrl.h>
 #endif
 
 class HSystem{
@@ -129,6 +130,17 @@ public:
 
 		v->AddRef();
 		return v->Release();
+	}
+
+	template<class T>
+	static ULONG GetRefCount(const Microsoft::WRL::ComPtr<T> &v) {
+		if (!v) {
+			return 0;
+		}
+
+		auto tmp = v.Get();
+		tmp->AddRef();
+		return tmp->Release();
 	}
 
 #if HAVE_WINRT == 1

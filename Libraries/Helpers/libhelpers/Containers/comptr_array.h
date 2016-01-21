@@ -15,10 +15,9 @@ public:
 	typedef typename containerType::const_reverse_iterator const_reverse_iterator;
 	typedef typename containerType::const_iterator const_iterator;
 	typedef typename containerType::const_reverse_iterator const_reverse_iterator;
-	typedef typename containerType::iterator iterator;
-	typedef typename containerType::reverse_iterator reverse_iterator;
 
 	comptr_array() {
+		this->container.fill(nullptr);
 	}
 
 	comptr_array(size_t size)
@@ -57,12 +56,37 @@ public:
 		return *this;
 	}
 
-	T * const&operator[](size_t idx) const {
+	T *get(size_t idx) const {
 		return this->container[idx];
 	}
 
-	T *&operator[](size_t idx) {
-		return this->container[idx];
+	void set(size_t idx, T *v) {
+		auto &dst = this->container[idx];
+
+		if (v) {
+			static_cast<IUnknown *>(v)->AddRef();
+		}
+
+		if (dst) {
+			static_cast<IUnknown *>(dst)->Release();
+		}
+
+		dst = v;
+	}
+
+	void set(size_t idx, const Microsoft::WRL::ComPtr<T> &v) {
+		auto tmp = v.Get();
+		auto &dst = this->container[idx];
+
+		if (tmp) {
+			static_cast<IUnknown *>(tmp)->AddRef();
+		}
+
+		if (dst) {
+			static_cast<IUnknown *>(dst)->Release();
+		}
+
+		dst = tmp;
 	}
 
 	size_t size() const {
@@ -77,16 +101,8 @@ public:
 		return this->container.data();
 	}
 
-	iterator begin() {
-		return this->container.begin();
-	}
-
 	const_iterator begin() const {
 		return this->container.begin();
-	}
-
-	iterator end() {
-		return this->container.end();
 	}
 
 	const_iterator end() const {
