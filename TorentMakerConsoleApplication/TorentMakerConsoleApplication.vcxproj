@@ -192,6 +192,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="DxHelpres\State\RSViewportState.h" />
     <ClInclude Include="FFmpegIoCtx.h" />
     <ClInclude Include="FileDialogEventsImpl.h" />
+    <ClInclude Include="Geometry\DynamicGeometry.h" />
     <ClInclude Include="Geometry\QuadStripFltIdx.h" />
     <ClInclude Include="Geometry\TexPosGeometry.h" />
     <ClInclude Include="Helpers\Deleters.h" />
@@ -206,12 +207,15 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClInclude Include="ResourceFactory\SamplerFactory.h" />
     <ClInclude Include="ResourceFactory\ShaderFactory.h" />
     <ClInclude Include="Shaders\ColorPS.h" />
+    <ClInclude Include="Shaders\DynamicGeometryVS.h" />
     <ClInclude Include="Shaders\Gradient2DPS.h" />
+    <ClInclude Include="Shaders\MatrixCBuffer.h" />
     <ClInclude Include="Shaders\QuadStripFltIndexVs.h" />
     <ClInclude Include="Shaders\ShaderCBuffer.h" />
     <ClInclude Include="Shaders\Tex1PS.h" />
     <ClInclude Include="Shaders\Yuv420pToRgbaPS.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StepTimer.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture\Bgra8CopyTexture.h" />
     <ClInclude Include="Texture\Bgra8RenderTarget.h" />
@@ -236,6 +240,7 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="DxHelpres\State\OMBlendState.cpp" />
     <ClCompile Include="FFmpegIoCtx.cpp" />
     <ClCompile Include="FileDialogEventsImpl.cpp" />
+    <ClCompile Include="Geometry\DynamicGeometry.cpp" />
     <ClCompile Include="Geometry\QuadStripFltIdx.cpp" />
     <ClCompile Include="Geometry\TexPosGeometry.cpp" />
     <ClCompile Include="Helpers\Deleters.cpp" />
@@ -250,7 +255,9 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
     <ClCompile Include="ResourceFactory\SamplerFactory.cpp" />
     <ClCompile Include="ResourceFactory\ShaderFactory.cpp" />
     <ClCompile Include="Shaders\ColorPS.cpp" />
+    <ClCompile Include="Shaders\DynamicGeometryVS.cpp" />
     <ClCompile Include="Shaders\Gradient2DPS.cpp" />
+    <ClCompile Include="Shaders\MatrixCBuffer.cpp" />
     <ClCompile Include="Shaders\QuadStripFltIndexVs.cpp" />
     <ClCompile Include="Shaders\ShaderCBuffer.cpp" />
     <ClCompile Include="Shaders\Tex1PS.cpp" />
@@ -277,6 +284,12 @@ xcopy "$(SolutionDir)Libraries\prebuilt\bin\Any\$(Platform)\*.dll" "$(OutDir)" /
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\Hlsl\DynamicGeometryVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\Hlsl\Gradient2DPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

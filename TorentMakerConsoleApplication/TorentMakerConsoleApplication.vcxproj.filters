@@ -47,6 +47,10 @@
     <ClInclude Include="ResourceFactory\BlendState.h" />
     <ClInclude Include="DxHelpres\State\OMBlendState.h" />
     <ClInclude Include="Geometry\TexPosGeometry.h" />
+    <ClInclude Include="Geometry\DynamicGeometry.h" />
+    <ClInclude Include="Shaders\DynamicGeometryVS.h" />
+    <ClInclude Include="Shaders\MatrixCBuffer.h" />
+    <ClInclude Include="StepTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -88,6 +92,9 @@
     <ClCompile Include="ResourceFactory\BlendState.cpp" />
     <ClCompile Include="DxHelpres\State\OMBlendState.cpp" />
     <ClCompile Include="Geometry\TexPosGeometry.cpp" />
+    <ClCompile Include="Geometry\DynamicGeometry.cpp" />
+    <ClCompile Include="Shaders\DynamicGeometryVS.cpp" />
+    <ClCompile Include="Shaders\MatrixCBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Hlsl\Yuv420pToRgbaPS.hlsl" />
@@ -95,5 +102,6 @@
     <FxCompile Include="Shaders\Hlsl\ColorPS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\Tex1PS.hlsl" />
     <FxCompile Include="Shaders\Hlsl\Gradient2DPS.hlsl" />
+    <FxCompile Include="Shaders\Hlsl\DynamicGeometryVS.hlsl" />
   </ItemGroup>
 </Project>

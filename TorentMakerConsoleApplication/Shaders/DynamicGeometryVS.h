@@ -2,9 +2,9 @@
 #include "MatrixCBuffer.h"
 #include "..\DxHelpres\DxHelpers.h"
 
-class QuadStripFltIndexVs {
+class DynamicGeometryVS {
 public:
-	QuadStripFltIndexVs(ID3D11Device *d3dDev);
+	DynamicGeometryVS(ID3D11Device *d3dDev);
 
 	const Microsoft::WRL::ComPtr<ID3D11InputLayout> &GetInputLayout() const;
 

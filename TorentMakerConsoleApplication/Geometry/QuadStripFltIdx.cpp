@@ -17,7 +17,7 @@ QuadStripFltIdx::QuadStripFltIdx(ID3D11Device *d3dDev) {
 	subResData.SysMemPitch = 0;
 	subResData.SysMemSlicePitch = 0;
 
-	hr = d3dDev->CreateBuffer(&bufDesc, &subResData, fltIdxBuf.GetAddressOf());
+	hr = d3dDev->CreateBuffer(&bufDesc, &subResData, this->fltIdxBuf.GetAddressOf());
 	H::System::ThrowIfFailed(hr);
 }
 
@@ -25,7 +25,7 @@ void QuadStripFltIdx::SetToContext(ID3D11DeviceContext *d3dCtx, uint32_t startSl
 	uint32_t stride = (uint32_t)sizeof(float);
 	uint32_t offset = 0;
 
-	d3dCtx->IASetVertexBuffers(startSlot, 1, fltIdxBuf.GetAddressOf(), &stride, &offset);
+	d3dCtx->IASetVertexBuffers(startSlot, 1, this->fltIdxBuf.GetAddressOf(), &stride, &offset);
 }
 
 D3D11_PRIMITIVE_TOPOLOGY QuadStripFltIdx::GetTopology() {

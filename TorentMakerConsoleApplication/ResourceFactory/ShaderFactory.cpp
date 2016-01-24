@@ -12,6 +12,16 @@ const std::shared_ptr<QuadStripFltIndexVs> &ShaderFactory::VS::GetQuadStripFltIn
 	return this->quadStripFltIndexVs;
 }
 
+const std::shared_ptr<DynamicGeometryVS> &ShaderFactory::VS::GetDynamicGeometryVS(ID3D11Device *dev) {
+	thread::critical_section::scoped_lock lk(this->cs);
+
+	if (!this->dynamicGeometryVS) {
+		this->dynamicGeometryVS = std::make_shared<DynamicGeometryVS>(dev);
+	}
+
+	return this->dynamicGeometryVS;
+}
+
 
 
 

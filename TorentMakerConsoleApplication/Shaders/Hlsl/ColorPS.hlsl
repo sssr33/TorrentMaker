@@ -5,7 +5,6 @@ cbuffer C0 : register(b0) {
 
 struct PsInput {
 	float4 pos : SV_POSITION;
-	float2 tex : TEXCOORD0;
 };
 
 float4 main(PsInput input) : SV_TARGET {

@@ -3,7 +3,7 @@
 #define WSTR1(x) L#x
 #define WSTR2(x) WSTR1(x)
 #define WSCONCAT(a, b) WSTR2(a) WSTR2(b)
-#define ARRAY_SIZE(A) sizeof A / sizeof A[0]
+#define ARRAY_SIZE(A) (sizeof A / sizeof A[0])
 
 #define NO_COPY(className) \
 	className(const className &) = delete; \

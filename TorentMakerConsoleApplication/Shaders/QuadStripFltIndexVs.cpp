@@ -1,16 +1,5 @@
 #include "QuadStripFltIndexVs.h"
 
-QuadStripFltIndexVsCBuffer::QuadStripFltIndexVsCBuffer(ID3D11Device *d3dDev)
-	: ShaderCBuffer(d3dDev, sizeof(DirectX::XMMATRIX)) {
-}
-
-void QuadStripFltIndexVsCBuffer::Update(ID3D11DeviceContext *d3dCtx, DirectX::CXMMATRIX data) {
-	this->UpdateInternal(d3dCtx, data);
-}
-
-
-
-
 QuadStripFltIndexVs::QuadStripFltIndexVs(ID3D11Device *d3dDev) {
 	HRESULT hr = S_OK;
 	auto data = H::System::LoadPackageFile(L"QuadStripFltIndexVs.cso");
@@ -30,13 +19,13 @@ const Microsoft::WRL::ComPtr<ID3D11InputLayout> &QuadStripFltIndexVs::GetInputLa
 	return this->inputLayout;
 }
 
-void QuadStripFltIndexVs::SetToContext(ID3D11DeviceContext *d3dCtx, const QuadStripFltIndexVsCBuffer &cbuffer) const {
+void QuadStripFltIndexVs::SetToContext(ID3D11DeviceContext *d3dCtx, const MatrixCBuffer &cbuffer) const {
 	auto &cbuffer0 = cbuffer.GetBuffer();
 
 	d3dCtx->VSSetShader(this->shader.Get(), nullptr, 0);
 	d3dCtx->VSSetConstantBuffers(0, 1, cbuffer0.GetAddressOf());
 }
 
-QuadStripFltIndexVsCBuffer QuadStripFltIndexVs::CreateCBuffer(ID3D11Device *d3dDev) {
-	return QuadStripFltIndexVsCBuffer(d3dDev);
+MatrixCBuffer QuadStripFltIndexVs::CreateCBuffer(ID3D11Device *d3dDev) {
+	return MatrixCBuffer(d3dDev);
 }

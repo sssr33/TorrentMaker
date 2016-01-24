@@ -5,13 +5,13 @@ cbuffer C0 : register(b0) {
 
 struct PsInput {
 	float4 pos : SV_POSITION;
-	float2 tex : TEXCOORD0;
+	float alpha : TEXCOORD0;
 };
 
 float4 main(PsInput input) : SV_TARGET{
 	float4 colorTmp = color;
 
-	colorTmp.a *= input.tex.x;
+	colorTmp.a *= input.alpha;
 
 	return colorTmp;
 }

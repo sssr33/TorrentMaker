@@ -14,6 +14,7 @@
 #include "Helpers\FFmpegHelpers.h"
 #include "Helpers\FileIterator.h"
 #include "Window\SimpleDxWindow.h"
+#include "StepTimer.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -161,11 +162,17 @@ int main() {
 				frame3DSize.y *= 0.95f;
 
 				D2D1::Matrix3x2F screenListProjInv;
-				auto screenListProj3D = DirectX::XMMatrixOrthographicLH(screenList3DSize.x, screenList3DSize.y, 0.1f, 10.0f);
-				auto screenListProj = H::Math::ProjectionD2D(
+				/*auto screenListProj3D = DirectX::XMMatrixOrthographicLH(screenList3DSize.x, screenList3DSize.y, 0.1f, 10.0f);*/
+				/*auto screenListProj = H::Math::ProjectionD2D(
 					(float)screenListSize.x, (float)screenListSize.y, 
 					screenListProj3D,
-					&screenListProjInv);
+					&screenListProjInv);*/
+
+
+				auto view = DirectX::XMMatrixLookToLH(DirectX::XMVectorSet(0, 0, 0, 1.0f), DirectX::g_XMIdentityR2, DirectX::g_XMIdentityR1);
+				auto screenListProj3D = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.0f), (float)screenListSize.x / (float)screenListSize.y, 0.1f, 10.0f);
+
+				screenListProj3D = DirectX::XMMatrixMultiply(view, screenListProj3D);
 
 				videoReader.IncrementProgress(timeStep);
 
@@ -236,6 +243,11 @@ int main() {
 					ctx->D2D()->EndDraw();
 				}*/
 
+				DX::StepTimer timer;
+
+				float simpleTimer = 0;
+
+				while (true)
 				{
 					DirectX::XMFLOAT2 penumbraPos;
 					DirectX::XMFLOAT2 frameHalfSize;
@@ -255,8 +267,6 @@ int main() {
 					bgraTexFinal->SetRenderTarget(ctx->D3D());
 					bgraTexFinal->SetViewport(ctx->D3D());
 
-					colorCb.Update(ctx->D3D(), DirectX::Colors::DarkBlue);
-
 					framePosTmp.x = framePosTmp.y = 0.0f;
 					frame3DSize.x = (float)frameSize.x / (float)frameSize.y;
 					frame3DSize.y = 1.0f;
@@ -264,124 +274,176 @@ int main() {
 					frameHalfSize.x = frame3DSize.x * 0.5f;
 					frameHalfSize.y = frame3DSize.y * 0.5f;
 
-					auto frameTransform = DirectX::XMMatrixMultiply(
+					/*auto frameTransform = DirectX::XMMatrixMultiply(
 						DirectX::XMMatrixScaling(frame3DSize.x, frame3DSize.y, 1.0f),
-						DirectX::XMMatrixTranslation(framePosTmp.x, framePosTmp.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
-
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-
-					InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
-					colorPs->SetToContext(ctx->D3D(), colorCb);
-
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+						DirectX::XMMatrixTranslation(framePosTmp.x, framePosTmp.y, 1.0f));*/
+					auto frameTransform = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationZ(simpleTimer), DirectX::XMMatrixTranslation(framePosTmp.x, framePosTmp.y, 1.0f));
+					auto frameTransformFinal = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
 
 
-					auto tmpColor = DirectX::Colors::DarkBlue;
+					float sinVal = (float)std::abs(std::sin(simpleTimer));
 
-					//tmpColor.f[3] = 0.25f;
+					{
+						// shadow
+						DirectX::XMVECTOR lightPos = DirectX::XMVectorSet(0, 0, -1, 1);
+						float lightRadius = 0.1f;// *sinVal;
+						DirectX::XMVECTOR groundPlane = DirectX::XMPlaneFromPointNormal(
+							DirectX::XMVectorSet(0, 0, 1.2f, 1),
+							DirectX::XMVectorSet(0, 0, -1, 0));
 
-					gradient2DCb.Update(ctx->D3D(), tmpColor);
-					gradient2DPs->SetToContext(ctx->D3D(), gradient2DCb);
+						DirectX::XMVECTOR geometryVerts[] = {
+							DirectX::XMVectorSet(-0.5f, -0.5f, 0.0f, 1.0f),
+							DirectX::XMVectorSet(-0.5f, 0.5f, 0.0f, 1.0f),
+							DirectX::XMVectorSet(0.5f, 0.5f, 0.0f, 1.0f),
+							DirectX::XMVectorSet(0.5f, -0.5f, 0.0f, 1.0f),
+						};
+						uint16_t geometryTri[] = {
+							0, 1, 2,
+							2, 1, 3
+						};
 
-					OMBlendState blendState(ctx->D3D());
-					alphaBlend->SetToContext(ctx->D3D());
+						size_t bufIdx = 0;
+						float alphaBuf[128];
+						DirectX::XMVECTOR posBuf[128];
 
-					// top
-					penumbraPos.x = framePosTmp.x;
-					penumbraPos.y = framePosTmp.y + frameHalfSize.y + penumbraSize * 0.5f;
+						std::vector<uint32_t> innerIdx;
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(frame3DSize.x, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+						innerIdx.reserve(4);
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+						DirectX::XMVECTOR trGeometryVerts[ARRAY_SIZE(geometryVerts)];
 
-					// right top
-					penumbraPos.x = framePosTmp.x + frameHalfSize.x + penumbraSize * 0.5f;
-					penumbraPos.y = framePosTmp.y + frameHalfSize.y + penumbraSize * 0.5f;
+						for (size_t i = 0; i < ARRAY_SIZE(geometryVerts); i++) {
+							trGeometryVerts[i] = DirectX::XMVector3Transform(geometryVerts[i], frameTransform);
+						}
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+						for (size_t i = 0; i < ARRAY_SIZE(trGeometryVerts); i++) {
+							size_t prevI = i == 0 ? (ARRAY_SIZE(trGeometryVerts) - 1) : i - 1 ;
+							size_t nextI = (i + 1) % ARRAY_SIZE(trGeometryVerts);
+							size_t nextI2 = (i + 2) % ARRAY_SIZE(trGeometryVerts);
+							DirectX::XMVECTOR edgePrev = trGeometryVerts[prevI];
+							DirectX::XMVECTOR edgeP1 = trGeometryVerts[i];
+							DirectX::XMVECTOR edgeP2 = trGeometryVerts[nextI];
+							DirectX::XMVECTOR edgeP22 = trGeometryVerts[nextI2];
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							DirectX::XMVECTOR shadowYVec = DirectX::XMVectorSubtract(edgeP2, edgeP1);
 
-					// right
-					penumbraPos.x = framePosTmp.x + frameHalfSize.x + penumbraSize * 0.5f;
-					penumbraPos.y = framePosTmp.y;
+							auto shadowP1YVec = shadowYVec;// DirectX::XMVectorAdd(DirectX::XMVectorSubtract(edgeP2, edgeP1), DirectX::XMVectorSubtract(edgeP1, edgePrev));
+							auto shadowP2YVec = shadowYVec;// DirectX::XMVectorAdd(DirectX::XMVectorSubtract(edgeP2, edgeP1), DirectX::XMVectorSubtract(edgeP22, edgeP2));
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, frame3DSize.y, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							DirectX::XMVECTOR shadowZVecP1 = DirectX::XMVectorSubtract(edgeP1, lightPos);
+							DirectX::XMVECTOR shadowZVecP2 = DirectX::XMVectorSubtract(edgeP2, lightPos);
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							DirectX::XMVECTOR shadowXVecP1Inner = 
+								DirectX::XMVector3Normalize(
+									DirectX::XMVector3Cross(shadowZVecP1, shadowP1YVec));
+							DirectX::XMVECTOR shadowXVecP2Inner =
+								DirectX::XMVector3Normalize(
+									DirectX::XMVector3Cross(shadowZVecP2, shadowP2YVec));
 
-					// right bottom
-					penumbraPos.x = framePosTmp.x + (frameHalfSize.x + penumbraSize * 0.5f);
-					penumbraPos.y = framePosTmp.y - (frameHalfSize.y + penumbraSize * 0.5f);
+							shadowXVecP1Inner = DirectX::XMVectorScale(shadowXVecP1Inner, lightRadius);
+							shadowXVecP2Inner = DirectX::XMVectorScale(shadowXVecP2Inner, lightRadius);
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							DirectX::XMVECTOR shadowXVecP1Outer =
+								DirectX::XMVector3Normalize(
+									DirectX::XMVector3Cross(shadowZVecP1, shadowYVec));
+							DirectX::XMVECTOR shadowXVecP2Outer =
+								DirectX::XMVector3Normalize(
+									DirectX::XMVector3Cross(shadowZVecP2, shadowYVec));
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							shadowXVecP1Outer = DirectX::XMVectorScale(shadowXVecP1Outer, -lightRadius);
+							shadowXVecP2Outer = DirectX::XMVectorScale(shadowXVecP2Outer, -lightRadius);
 
-					// bottom
-					penumbraPos.x = framePosTmp.x;
-					penumbraPos.y = framePosTmp.y - (frameHalfSize.y + penumbraSize * 0.5f);
+							/*auto shadowXVecP1Outer = DirectX::XMVectorNegate(shadowXVecP1Inner);
+							auto shadowXVecP2Outer = DirectX::XMVectorNegate(shadowXVecP2Inner);*/
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(frame3DSize.x, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							auto lightP1InnerPoint = DirectX::XMVectorAdd(shadowXVecP1Inner, lightPos);
+							auto lightP2InnerPoint = DirectX::XMVectorAdd(shadowXVecP2Inner, lightPos);
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							auto lightP1OuterPoint = DirectX::XMVectorAdd(shadowXVecP1Outer, lightPos);
+							auto lightP2OuterPoint = DirectX::XMVectorAdd(shadowXVecP2Outer, lightPos);
 
-					// left bottom
-					penumbraPos.x = framePosTmp.x - (frameHalfSize.x + penumbraSize * 0.5f);
-					penumbraPos.y = framePosTmp.y - (frameHalfSize.y + penumbraSize * 0.5f);
+							auto shadowP1InnerPoint = DirectX::XMPlaneIntersectLine(groundPlane, lightP1InnerPoint, edgeP1);
+							auto shadowP2InnerPoint = DirectX::XMPlaneIntersectLine(groundPlane, lightP2InnerPoint, edgeP2);
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							auto shadowP1OuterPoint = DirectX::XMPlaneIntersectLine(groundPlane, lightP1OuterPoint, edgeP1);
+							auto shadowP2OuterPoint = DirectX::XMPlaneIntersectLine(groundPlane, lightP2OuterPoint, edgeP2);
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							//
+							innerIdx.push_back(bufIdx);
+							alphaBuf[bufIdx] = 1.0f;
+							posBuf[bufIdx++] = shadowP1InnerPoint;
 
-					// left
-					penumbraPos.x = framePosTmp.x - (frameHalfSize.x + penumbraSize * 0.5f);
-					penumbraPos.y = framePosTmp.y;
+							alphaBuf[bufIdx] = 0.0f;
+							posBuf[bufIdx++] = shadowP1OuterPoint;
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, frame3DSize.y, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							alphaBuf[bufIdx] = 0.0f;
+							posBuf[bufIdx++] = shadowP2OuterPoint;
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
 
-					// left top
-					penumbraPos.x = framePosTmp.x - (frameHalfSize.x + penumbraSize * 0.5f);
-					penumbraPos.y = framePosTmp.y + (frameHalfSize.y + penumbraSize * 0.5f);
+							alphaBuf[bufIdx] = 1.0f;
+							posBuf[bufIdx++] = shadowP1InnerPoint;
 
-					frameTransform = DirectX::XMMatrixMultiply(
-						DirectX::XMMatrixScaling(penumbraSize, penumbraSize, 1.0f),
-						DirectX::XMMatrixTranslation(penumbraPos.x, penumbraPos.y, 1.0f));
-					frameTransform = DirectX::XMMatrixMultiplyTranspose(frameTransform, screenListProj3D);
+							alphaBuf[bufIdx] = 0.0f;
+							posBuf[bufIdx++] = shadowP2OuterPoint;
 
-					vsCBuffer.Update(ctx->D3D(), frameTransform);
-					ctx->D3D()->Draw(geometry->GetVertexCount(), 0);
+							alphaBuf[bufIdx] = 1.0f;
+							posBuf[bufIdx++] = shadowP2InnerPoint;
+							//
+
+							int stop = 34;
+						}
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[0]];
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[1]];
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[2]];
+
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[0]];
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[2]];
+
+						alphaBuf[bufIdx] = 1.0f;
+						posBuf[bufIdx++] = posBuf[innerIdx[3]];
+
+						OMBlendState blendState(ctx->D3D());
+						alphaBlend->SetToContext(ctx->D3D());
+
+						DynamicGeometry shadowGeom(d3dDev, 128);
+						auto shadowGeomVS = dx.res.Shaders.VS.GetDynamicGeometryVS(d3dDev);
+						auto shadowGeomVSCBuffer = shadowGeomVS->CreateCBuffer(d3dDev);
+
+						shadowGeom.Update(ctx->D3D(), posBuf, alphaBuf, bufIdx);
+
+						gradient2DCb.Update(ctx->D3D(), DirectX::Colors::Black);
+						shadowGeomVSCBuffer.Update(ctx->D3D(), DirectX::XMMatrixTranspose(screenListProj3D));
+
+						InputAssembler::Set(ctx->D3D(), shadowGeom, *shadowGeomVS, shadowGeomVSCBuffer);
+						gradient2DPs->SetToContext(ctx->D3D(), gradient2DCb);
+
+						ctx->D3D()->Draw(shadowGeom.GetVertexCount(), 0);
+					}
+
+					{
+						// main geometry
+						/*colorCb.Update(ctx->D3D(), DirectX::Colors::Blue);
+						vsCBuffer.Update(ctx->D3D(), frameTransformFinal);
+
+						InputAssembler::Set(ctx->D3D(), *geometry, *vs, vsCBuffer);
+						colorPs->SetToContext(ctx->D3D(), colorCb);
+
+						ctx->D3D()->Draw(geometry->GetVertexCount(), 0);*/
+					}
+
+
+					simpleTimer += 0.01f;
+					/*timer.Tick([]() {});*/
 				}
 
 				while (true)
